@@ -1,0 +1,52 @@
+{
+  "placeholderImages": [
+    {
+      "id": "skill-python",
+      "description": "Python Programming skill track cover",
+      "imageUrl": "https://images.unsplash.com/photo-1653387141060-9a9834f47777?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjb2RlJTIwcHJvZ3JhbW1pbmd8ZW58MHx8fHwxNzU4NTk3NTgwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "code programming"
+    },
+    {
+      "id": "skill-public-speaking",
+      "description": "Public Speaking skill track cover",
+      "imageUrl": "https://images.unsplash.com/photo-1568983268695-74a04650c8b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxwcmVzZW50YXRpb24lMjBjb25mZXJlbmNlfGVufDB8fHx8MTc1ODYwMTgwNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "presentation conference"
+    },
+    {
+      "id": "skill-ui-ux",
+      "description": "UI/UX Design skill track cover",
+      "imageUrl": "https://images.unsplash.com/photo-1680016661694-1cd3faf31c3a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxkZXNpZ24lMjB3aXJlZnJhbWV8ZW58MHx8fHwxNzU4NTgyODExfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "design wireframe"
+    },
+    {
+      "id": "skill-project-management",
+      "description": "Project Management skill track cover",
+      "imageUrl": "https://images.unsplash.com/flagged/photo-1556514767-5c270b96a005?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxwbGFubmluZyUyMGJvYXJkfGVufDB8fHx8MTc1ODYwMTgwNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "planning board"
+    },
+    {
+      "id": "memory-1",
+      "description": "A saved mind map about photosynthesis",
+      "imageUrl": "https://images.unsplash.com/photo-1711409650645-a568a59446f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxtaW5kbWFwJTIwc2NpZW5jZXxlbnwwfHx8fDE3NTg1OTc1OTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mindmap science"
+    },
+    {
+      "id": "memory-2",
+      "description": "A saved visual analogy for neural networks",
+      "imageUrl": "https://images.unsplash.com/photo-1738082956213-aa554ba67bda?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxhYnN0cmFjdCUyMG5ldHdvcmt8ZW58MHx8fHwxNzU4NTg3MDA0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "abstract network"
+    },
+    {
+      "id": "memory-3",
+      "description": "Quiz results for calculus",
+      "imageUrl": "https://images.unsplash.com/photo-1563464284524-8229f8bcd56f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxjaGFydCUyMGdyYXBofGVufDB8fHx8MTc1ODU4ODEyNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "chart graph"
+    },
+    {
+      "id": "memory-4",
+      "description": "Saved notes on historical events",
+      "imageUrl": "https://images.unsplash.com/photo-1683178862099-325f9b29e081?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxoaXN0b3J5JTIwZG9jdW1lbnR8ZW58MHx8fHwxNzU4NjAxODA0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "history document"
+    }
+  ]
+}
