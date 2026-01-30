@@ -13,10 +13,81 @@ import {
 } from "@/components/ui/sidebar";
 import { MemoryPalaceProvider } from "@/context/memory-palace-context";
 import { UserInterestsProvider } from "@/context/user-interests-context";
+import { FocusModeProvider, useFocusMode } from "@/context/focus-mode-context";
 import { Loader2, Rocket } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { PageTransition } from "@/components/page-transition";
 import { NavigationProgress } from "@/components/navigation-progress";
+import { FocusModeToggle } from "@/components/focus-mode-toggle";
+import { FloatingAIButton } from "@/components/floating-ai-button";
+import { FeatureRequestButton } from "@/components/feedback";
+import { cn } from "@/lib/utils";
+
+function AppContent({ children }: { children: React.ReactNode }) {
+  const { isFocusMode } = useFocusMode();
+
+  return (
+    <div className="min-h-screen w-full">
+      <Suspense fallback={null}>
+        <NavigationProgress />
+      </Suspense>
+      <SidebarProvider>
+        <Sidebar className={cn(
+          "transition-all duration-300",
+          isFocusMode && "!-translate-x-full md:!-translate-x-full"
+        )}>
+          <Navigation />
+        </Sidebar>
+        <SidebarInset className={cn(
+          "transition-all duration-300",
+          isFocusMode && "!ml-0"
+        )}>
+          {/* Mobile Header */}
+          <header className={cn(
+            "flex md:hidden items-center justify-between p-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 transition-all duration-300",
+            isFocusMode && "opacity-0 pointer-events-none h-0 p-0 border-0 overflow-hidden"
+          )}>
+            <div className="flex items-center gap-3">
+              <SidebarTrigger />
+              <div className="flex items-center gap-2">
+                <Rocket className="w-6 h-6 text-primary" />
+                <span className="font-headline font-semibold">UniPeasy</span>
+              </div>
+            </div>
+            <FocusModeToggle variant="minimal" />
+          </header>
+          
+          {/* Focus Mode Exit Button */}
+          {isFocusMode && (
+            <div className="fixed top-4 right-4 z-50">
+              <FocusModeToggle variant="default" />
+            </div>
+          )}
+          
+          <main className={cn(
+            "p-4 sm:p-6 lg:p-8 transition-all duration-300",
+            isFocusMode && "max-w-4xl mx-auto"
+          )}>
+            <PageTransition>{children}</PageTransition>
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
+      
+      {/* Floating Components */}
+      {!isFocusMode && (
+        <>
+          {/* <FloatingAIButton 
+            onAskQuestion={async (question) => {
+              // This can be connected to your AI service
+              return "This is a placeholder response. Connect this to your AI service for real responses.";
+            }}
+          /> */}
+          <FeatureRequestButton />
+        </>
+      )}
+    </div>
+  );
+}
 
 export default function AppLayout({
   children,
@@ -49,31 +120,9 @@ export default function AppLayout({
   return (
     <UserInterestsProvider>
       <MemoryPalaceProvider>
-        <div className="min-h-screen w-full">
-          <Suspense fallback={null}>
-            <NavigationProgress />
-          </Suspense>
-          <SidebarProvider>
-            <Sidebar>
-              <Navigation />
-            </Sidebar>
-            <SidebarInset>
-              {/* Mobile Header */}
-              <header className="flex md:hidden items-center justify-between p-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-                <div className="flex items-center gap-3">
-                  <SidebarTrigger />
-                  <div className="flex items-center gap-2">
-                    <Rocket className="w-6 h-6 text-primary" />
-                    <span className="font-headline font-semibold">UniPeasy</span>
-                  </div>
-                </div>
-              </header>
-              <main className="p-4 sm:p-6 lg:p-8">
-                <PageTransition>{children}</PageTransition>
-              </main>
-            </SidebarInset>
-          </SidebarProvider>
-        </div>
+        <FocusModeProvider>
+          <AppContent>{children}</AppContent>
+        </FocusModeProvider>
       </MemoryPalaceProvider>
     </UserInterestsProvider>
   );

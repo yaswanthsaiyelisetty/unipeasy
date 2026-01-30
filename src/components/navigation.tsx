@@ -73,6 +73,12 @@ const navItems = [
     label: "Memory Palace",
   },
 ];
+  // Add About page nav item
+  navItems.push({
+    href: "/about",
+    icon: Rocket,
+    label: "About",
+  });
 
 export function Navigation() {
   const pathname = usePathname();

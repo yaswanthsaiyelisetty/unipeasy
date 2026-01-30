@@ -32,6 +32,10 @@ import { useMemoryPalace } from "@/context/memory-palace-context";
 import { useAuth } from "@/context/auth-context";
 import { cn } from "@/lib/utils";
 import { initializeUserAnalytics } from "@/lib/analytics";
+import { StudyStreak } from "@/components/study-streak";
+import { ContinueLearning } from "@/components/continue-learning";
+import { GamifiedProgress } from "@/components/gamified-progress";
+import { FeedbackForm } from "@/components/feedback";
 
 const quickAccessItems = [
   {
@@ -193,6 +197,9 @@ export default function DashboardPage() {
             </p>
           </div>
           <div className="flex items-center gap-6">
+            {/* Study Streak - Compact Version */}
+            <StudyStreak variant="compact" />
+            <div className="h-10 w-px bg-border hidden sm:block" />
             <div className="text-right hidden sm:block">
               <p className="text-xl font-semibold">
                 {progressData.length}
@@ -210,9 +217,15 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Study Streak Card - Detailed Version */}
+      <StudyStreak variant="detailed" />
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Continue Learning from Last Access */}
+          <ContinueLearning />
+          
           {/* Continue Learning Card */}
           {lastVisited && (
             <Card className="border shadow-sm">
@@ -348,19 +361,15 @@ export default function DashboardPage() {
               {progressData.length > 0 ? (
                 progressData.map((item) => (
                   <Link href={`/skills/${item.slug}`} key={item.title} className="block group">
-                    <div className="space-y-2 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium text-sm">{item.title}</span>
-                        <span className="text-xs font-medium text-muted-foreground">
-                          {item.progress}%
-                        </span>
-                      </div>
-                      <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-foreground transition-all duration-500"
-                          style={{ width: `${item.progress}%` }}
-                        />
-                      </div>
+                    <div className="p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                      <GamifiedProgress
+                        value={item.progress}
+                        label={item.title}
+                        showPercentage={true}
+                        size="sm"
+                        variant="gradient"
+                        celebrateOnComplete={true}
+                      />
                     </div>
                   </Link>
                 ))
@@ -400,6 +409,46 @@ export default function DashboardPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Feedback Card */}
+          <Card className="border shadow-sm">
+            <CardContent className="p-5">
+              <div className="flex items-start gap-3">
+                <div className="p-1.5 rounded bg-primary/10">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                </div>
+                <div className="flex-grow">
+                  <h3 className="font-medium text-sm mb-1">Help Us Improve</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+                    Share your thoughts and help us make UniPeasy better for everyone.
+                  </p>
+                  <FeedbackForm />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+      {/* Social & Contact Section */}
+      <div className="mt-12 flex flex-col items-center gap-4">
+        <Link
+          href="https://www.instagram.com/unipeasy?igsh=NjBteXFzMzloMmFu"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 text-white font-semibold shadow hover:scale-105 transition-transform"
+        >
+          <span className="w-5 h-5">
+            {/* Instagram Icon */}
+            <svg viewBox="0 0 448 512" fill="currentColor" aria-hidden="true" className="w-5 h-5"><path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9 114.9-51.3 114.9-114.9S287.7 141 224.1 141zm0 186c-39.5 0-71.5-32-71.5-71.5s32-71.5 71.5-71.5 71.5 32 71.5 71.5-32 71.5-71.5 71.5zm146.4-194.3c0 14.9-12 26.9-26.9 26.9s-26.9-12-26.9-26.9 12-26.9 26.9-26.9 26.9 12 26.9 26.9zm76.1 27.2c-1.7-35.3-9.9-66.7-36.2-92.1S388.6 1.7 353.3 0C317.5-1.7 130.5-1.7 94.7 0 59.4 1.7 28 9.9 2.7 36.2S1.7 59.4 0 94.7C-1.7 130.5-1.7 317.5 0 353.3c1.7 35.3 9.9 66.7 36.2 92.1s56.8 34.5 92.1 36.2c35.8 1.7 222.8 1.7 258.6 0 35.3-1.7 66.7-9.9 92.1-36.2s34.5-56.8 36.2-92.1c1.7-35.8 1.7-222.8 0-258.6zM398.8 388c-7.8 19.6-22.9 34.7-42.5 42.5-29.4 11.7-99.2 9-132.3 9s-102.9 2.6-132.3-9c-19.6-7.8-34.7-22.9-42.5-42.5-11.7-29.4-9-99.2-9-132.3s-2.6-102.9 9-132.3c7.8-19.6 22.9-34.7 42.5-42.5C123.1 43.2 192.9 45.8 226 45.8s102.9-2.6 132.3 9c19.6 7.8 34.7 22.9 42.5 42.5 11.7 29.4 9 99.2 9 132.3s2.7 102.9-9 132.3z" /></svg>
+          </span>
+          <span>Follow us on Instagram</span>
+        </Link>
+        <div className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-gray-100 text-gray-800 font-semibold shadow">
+          <span className="w-5 h-5">
+            {/* Gmail Icon */}
+            <svg viewBox="0 0 512 512" fill="currentColor" aria-hidden="true" className="w-5 h-5"><path d="M502.3 190.8L327.4 338.3c-15.9 13.2-39.1 13.2-55 0L9.7 190.8C3.9 186.1 0 178.7 0 170.7V80c0-26.5 21.5-48 48-48h416c26.5 0 48 21.5 48 48v90.7c0 8-3.9 15.4-9.7 20.1zM464 80c0-8.8-7.2-16-16-16H64c-8.8 0-16 7.2-16 16v61.8l208 172.2 208-172.2V80zm48 90.7c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32V432c0 26.5 21.5 48 48 48h416c26.5 0 48-21.5 48-48V170.7z" /></svg>
+          </span>
+          <span>theunipeasy@gmail.com</span>
         </div>
       </div>
     </div>
