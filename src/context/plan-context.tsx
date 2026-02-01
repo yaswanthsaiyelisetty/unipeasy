@@ -21,6 +21,7 @@ interface PlanDetails {
   claimedAt: string | null;
   originalPrice: number;
   paidPrice: number;
+  isNewGoogleUser?: boolean;
 }
 
 const defaultPlanDetails: PlanDetails = {
@@ -58,6 +59,13 @@ export function PlanProvider({ children }: { children: ReactNode }) {
           const data = planDoc.data() as PlanDetails;
           setPlanDetails(data);
           setHasActivePlan(data.status === 'active');
+          
+          // Auto-show claim modal for new Google users who haven't claimed
+          if (data.isNewGoogleUser && data.status === 'inactive') {
+            setShowClaimModal(true);
+            // Clear the flag after showing modal
+            await setDoc(userPlanRef, { ...data, isNewGoogleUser: false }, { merge: true });
+          }
         } else {
           // Initialize plan document for new users
           await setDoc(userPlanRef, defaultPlanDetails);

@@ -52,7 +52,8 @@ const quickAccessItems = [
     icon: Lightbulb,
     description: "AI-powered explanations",
     requiresPlan: true,
-    gradient: "from-yellow-500/20 to-orange-500/20",
+    gradient: "from-yellow-500/10 to-orange-500/10",
+    iconColor: "text-yellow-400",
   },
   {
     title: "AI Exam Strategist",
@@ -60,7 +61,8 @@ const quickAccessItems = [
     icon: Target,
     description: "Plan your success",
     requiresPlan: true,
-    gradient: "from-blue-500/20 to-cyan-500/20",
+    gradient: "from-blue-500/10 to-cyan-500/10",
+    iconColor: "text-blue-400",
   },
   {
     title: "Study Materials",
@@ -68,7 +70,8 @@ const quickAccessItems = [
     icon: BookOpen,
     description: "Verified notes & resources",
     requiresPlan: true,
-    gradient: "from-green-500/20 to-emerald-500/20",
+    gradient: "from-green-500/10 to-emerald-500/10",
+    iconColor: "text-green-400",
   },
   {
     title: "All Skills",
@@ -76,7 +79,8 @@ const quickAccessItems = [
     icon: Star,
     description: "Master new abilities",
     requiresPlan: true,
-    gradient: "from-purple-500/20 to-pink-500/20",
+    gradient: "from-purple-500/10 to-pink-500/10",
+    iconColor: "text-purple-400",
   },
   {
     title: "Memory Palace",
@@ -84,7 +88,8 @@ const quickAccessItems = [
     icon: BrainCircuit,
     description: "Store your knowledge",
     requiresPlan: true,
-    gradient: "from-red-500/20 to-rose-500/20",
+    gradient: "from-red-500/10 to-rose-500/10",
+    iconColor: "text-red-400",
   },
 ];
 
@@ -306,9 +311,7 @@ export default function DashboardPage() {
                       item.gradient
                     )}>
                       <CardContent className="p-5">
-                        <div className="w-10 h-10 rounded-lg bg-background/80 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                          <item.icon className="h-5 w-5" />
-                        </div>
+                        <item.icon className={cn("h-8 w-8 mb-3 transition-transform group-hover:scale-110", item.iconColor)} />
                         <h3 className="font-medium text-sm mb-1">{item.title}</h3>
                         <p className="text-xs text-muted-foreground">{item.description}</p>
                       </CardContent>
@@ -546,7 +549,7 @@ function ConnectButtons() {
             <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9 114.9-51.3 114.9-114.9S287.7 141 224.1 141zm0 186c-39.5 0-71.5-32-71.5-71.5s32-71.5 71.5-71.5 71.5 32 71.5 71.5-32 71.5-71.5 71.5zm146.4-194.3c0 14.9-12 26.9-26.9 26.9s-26.9-12-26.9-26.9 12-26.9 26.9-26.9 26.9 12 26.9 26.9zm76.1 27.2c-1.7-35.3-9.9-66.7-36.2-92.1S388.6 1.7 353.3 0C317.5-1.7 130.5-1.7 94.7 0 59.4 1.7 28 9.9 2.7 36.2S1.7 59.4 0 94.7C-1.7 130.5-1.7 317.5 0 353.3c1.7 35.3 9.9 66.7 36.2 92.1s56.8 34.5 92.1 36.2c35.8 1.7 222.8 1.7 258.6 0 35.3-1.7 66.7-9.9 92.1-36.2s34.5-56.8 36.2-92.1c1.7-35.8 1.7-222.8 0-258.6zM398.8 388c-7.8 19.6-22.9 34.7-42.5 42.5-29.4 11.7-99.2 9-132.3 9s-102.9 2.6-132.3-9c-19.6-7.8-34.7-22.9-42.5-42.5-11.7-29.4-9-99.2-9-132.3s-2.6-102.9 9-132.3c7.8-19.6 22.9-34.7 42.5-42.5C123.1 43.2 192.9 45.8 226 45.8s102.9-2.6 132.3 9c19.6 7.8 34.7 22.9 42.5 42.5 11.7 29.4 9 99.2 9 132.3s2.7 102.9-9 132.3z" />
           </svg>
           <span className="font-medium text-muted-foreground group-hover:text-white transition-colors duration-300">
-            @theunipeasy
+            @unipeasy
           </span>
         </div>
       </motion.a>

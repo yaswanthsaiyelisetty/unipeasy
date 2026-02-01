@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -25,9 +25,17 @@ import {
 } from "@/components/ui/card";
 import { Rocket, Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { auth } from "@/lib/firebase";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, sendPasswordResetEmail } from "firebase/auth";
+import { auth, googleProvider, db } from "@/lib/firebase";
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  updateProfile, 
+  sendPasswordResetEmail,
+  signInWithPopup
+} from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
+import { GoogleIcon } from "@/components/icons/google-icon";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -84,6 +92,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
@@ -109,6 +118,47 @@ export default function LoginPage() {
       toast({ variant: "destructive", title: "Login Failed", description: errorMessage });
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function onGoogleSignIn() {
+    setGoogleLoading(true);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      
+      // Check if user exists in Firestore
+      const userPlanRef = doc(db, 'userPlans', user.uid);
+      const planDoc = await getDoc(userPlanRef);
+      
+      if (!planDoc.exists()) {
+        // New user - create user document with hasActivePlan: false
+        await setDoc(userPlanRef, {
+          status: 'inactive',
+          planType: 'free',
+          claimedAt: null,
+          originalPrice: 300,
+          paidPrice: 0,
+          isNewGoogleUser: true, // Flag for triggering claim modal
+        });
+        toast({ 
+          title: "Welcome to UniPeasy! 🎉", 
+          description: "Your account has been created. Claim your free plan!" 
+        });
+      } else {
+        toast({ title: "Welcome back!", description: `Good to see you, ${user.displayName || 'Student'}!` });
+      }
+      
+      router.push("/dashboard");
+    } catch (error: any) {
+      if (error.code === 'auth/popup-closed-by-user') {
+        // User closed the popup, no need to show error
+        return;
+      }
+      const errorMessage = getAuthErrorMessage(error.code);
+      toast({ variant: "destructive", title: "Google Sign-In Failed", description: errorMessage });
+    } finally {
+      setGoogleLoading(false);
     }
   }
 
@@ -175,6 +225,34 @@ export default function LoginPage() {
                 <CardTitle className="font-headline text-3xl">Welcome Back!</CardTitle>
                 <CardDescription>Sign in to continue your journey.</CardDescription>
               </CardHeader>
+              
+              {/* Google Sign-In Button */}
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full mb-6 h-12 bg-zinc-900 hover:bg-zinc-800 border-zinc-700 hover:border-zinc-600 text-white transition-all duration-200 shadow-lg hover:shadow-xl"
+                onClick={onGoogleSignIn}
+                disabled={googleLoading || loading}
+              >
+                {googleLoading ? (
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                ) : (
+                  <GoogleIcon className="mr-3 h-5 w-5" />
+                )}
+                Continue with Google
+              </Button>
+
+              <div className="relative mb-6">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-muted" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    Or continue with email
+                  </span>
+                </div>
+              </div>
+
               <Form {...loginForm}>
                 <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-6">
                   <FormField
@@ -224,6 +302,34 @@ export default function LoginPage() {
                 <CardTitle className="font-headline text-3xl">Create an Account</CardTitle>
                 <CardDescription>Join us to start your learning journey.</CardDescription>
               </CardHeader>
+
+              {/* Google Sign-Up Button */}
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full mb-6 h-12 bg-zinc-900 hover:bg-zinc-800 border-zinc-700 hover:border-zinc-600 text-white transition-all duration-200 shadow-lg hover:shadow-xl"
+                onClick={onGoogleSignIn}
+                disabled={googleLoading || loading}
+              >
+                {googleLoading ? (
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                ) : (
+                  <GoogleIcon className="mr-3 h-5 w-5" />
+                )}
+                Continue with Google
+              </Button>
+
+              <div className="relative mb-6">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-muted" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    Or sign up with email
+                  </span>
+                </div>
+              </div>
+
               <Form {...signupForm}>
                 <form onSubmit={signupForm.handleSubmit(onSignup)} className="space-y-6">
                 <FormField

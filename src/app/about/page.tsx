@@ -180,7 +180,7 @@ function ConnectSection() {
     >
       {/* Instagram Button */}
       <motion.a
-        href="https://instagram.com/theunipeasy"
+        href="https://www.instagram.com/unipeasy?igsh=NjBteXFzMzloMmFu"
         target="_blank"
         rel="noopener noreferrer"
         whileHover={{ scale: 1.05 }}
@@ -195,7 +195,7 @@ function ConnectSection() {
         <div className="relative flex items-center gap-3">
           <Instagram className="h-5 w-5 text-muted-foreground group-hover:text-white transition-colors duration-300" />
           <span className="font-medium text-muted-foreground group-hover:text-white transition-colors duration-300">
-            @theunipeasy
+            @unipeasy
           </span>
         </div>
       </motion.a>
