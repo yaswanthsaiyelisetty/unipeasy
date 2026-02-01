@@ -14,13 +14,16 @@ import {
 import { MemoryPalaceProvider } from "@/context/memory-palace-context";
 import { UserInterestsProvider } from "@/context/user-interests-context";
 import { FocusModeProvider, useFocusMode } from "@/context/focus-mode-context";
+import { PlanProvider } from "@/context/plan-context";
 import { Loader2, Rocket } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { PageTransition } from "@/components/page-transition";
 import { NavigationProgress } from "@/components/navigation-progress";
 import { FocusModeToggle } from "@/components/focus-mode-toggle";
 import { FloatingAIButton } from "@/components/floating-ai-button";
+import { GlobalAIChat } from "@/components/global-ai-chat";
 import { FeatureRequestButton } from "@/components/feedback";
+import { ClaimPlanModal } from "@/components/claim-plan-modal";
 import { cn } from "@/lib/utils";
 
 function AppContent({ children }: { children: React.ReactNode }) {
@@ -76,12 +79,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
       {/* Floating Components */}
       {!isFocusMode && (
         <>
-          {/* <FloatingAIButton 
-            onAskQuestion={async (question) => {
-              // This can be connected to your AI service
-              return "This is a placeholder response. Connect this to your AI service for real responses.";
-            }}
-          /> */}
+          <GlobalAIChat />
           <FeatureRequestButton />
         </>
       )}
@@ -121,7 +119,10 @@ export default function AppLayout({
     <UserInterestsProvider>
       <MemoryPalaceProvider>
         <FocusModeProvider>
-          <AppContent>{children}</AppContent>
+          <PlanProvider>
+            <AppContent>{children}</AppContent>
+            <ClaimPlanModal />
+          </PlanProvider>
         </FocusModeProvider>
       </MemoryPalaceProvider>
     </UserInterestsProvider>

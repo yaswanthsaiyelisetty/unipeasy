@@ -13,8 +13,9 @@ import { useMemoryPalace } from "@/context/memory-palace-context";
 import { Button } from "@/components/ui/button";
 import { BrainCircuit, Trash2, Loader2, X, BookOpen, Lightbulb, Map } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { PlanGuard } from "@/components/plan-guard";
 
-export default function MemoryPalacePage() {
+function MemoryPalaceContent() {
   const { memoryItems, removeMemoryItem, clearMemoryPalace, isLoaded } = useMemoryPalace();
 
   const getTypeIcon = (type: string) => {
@@ -93,5 +94,13 @@ export default function MemoryPalacePage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function MemoryPalacePage() {
+  return (
+    <PlanGuard>
+      <MemoryPalaceContent />
+    </PlanGuard>
   );
 }

@@ -1,6 +1,8 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   ArrowRight,
   Book,
@@ -15,8 +17,10 @@ import {
   Zap,
   Trophy,
   Rocket,
-  FileText,
   BookOpen,
+  Mail,
+  Copy,
+  CheckCircle2,
 } from "lucide-react";
 import {
   Card,
@@ -30,12 +34,16 @@ import { skillsData, type SkillTrack, type Level } from "@/lib/skills-data";
 import { useState, useEffect } from "react";
 import { useMemoryPalace } from "@/context/memory-palace-context";
 import { useAuth } from "@/context/auth-context";
+import { usePlan } from "@/context/plan-context";
 import { cn } from "@/lib/utils";
 import { initializeUserAnalytics } from "@/lib/analytics";
 import { StudyStreak } from "@/components/study-streak";
 import { ContinueLearning } from "@/components/continue-learning";
 import { GamifiedProgress } from "@/components/gamified-progress";
 import { FeedbackForm } from "@/components/feedback";
+import { FeatureLock, ClaimPlanBanner } from "@/components/feature-lock";
+import { staggerContainer, fadeUpVariant, hoverGlow, tapEffect } from "@/lib/animations";
+import { useToast } from "@/hooks/use-toast";
 
 const quickAccessItems = [
   {
@@ -43,36 +51,40 @@ const quickAccessItems = [
     href: "/learn",
     icon: Lightbulb,
     description: "AI-powered explanations",
+    requiresPlan: true,
+    gradient: "from-yellow-500/20 to-orange-500/20",
   },
   {
     title: "AI Exam Strategist",
     href: "/strategist",
     icon: Target,
     description: "Plan your success",
+    requiresPlan: true,
+    gradient: "from-blue-500/20 to-cyan-500/20",
   },
   {
     title: "Study Materials",
     href: "/materials",
     icon: BookOpen,
-    description: "JNTUK notes & resources",
-  },
-  {
-    title: "My Documents",
-    href: "/my-documents",
-    icon: FileText,
-    description: "Store your PDFs & notes",
+    description: "Verified notes & resources",
+    requiresPlan: true,
+    gradient: "from-green-500/20 to-emerald-500/20",
   },
   {
     title: "All Skills",
     href: "/skills",
     icon: Star,
     description: "Master new abilities",
+    requiresPlan: true,
+    gradient: "from-purple-500/20 to-pink-500/20",
   },
   {
     title: "Memory Palace",
     href: "/memory-palace",
     icon: BrainCircuit,
     description: "Store your knowledge",
+    requiresPlan: true,
+    gradient: "from-red-500/20 to-rose-500/20",
   },
 ];
 
@@ -89,6 +101,7 @@ type LastVisitedLevel = {
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const { hasActivePlan } = usePlan();
   const [progressData, setProgressData] = useState<ProgressData[]>([]);
   const [lastVisited, setLastVisited] = useState<LastVisitedLevel | null>(null);
   const { memoryItems, isLoaded } = useMemoryPalace();
@@ -178,6 +191,9 @@ export default function DashboardPage() {
         mounted ? "opacity-100" : "opacity-0"
       )}
     >
+      {/* Claim Plan Banner for free users */}
+      <ClaimPlanBanner />
+
       {/* Hero Section */}
       <div
         className={cn(
@@ -270,24 +286,63 @@ export default function DashboardPage() {
               <Rocket className="w-4 h-4 text-muted-foreground" />
               Quick Access
             </h2>
-            <div className="grid grid-cols-2 gap-4">
-              {quickAccessItems.map((item) => (
-                <Link href={item.href} key={item.title} className="group">
-                  <Card className="h-full border shadow-sm hover:shadow-md transition-shadow">
-                    <CardContent className="p-5">
-                      <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center mb-3 group-hover:bg-foreground group-hover:text-background transition-colors">
-                        <item.icon className="h-5 w-5" />
+            <motion.div 
+              variants={staggerContainer}
+              initial="hidden"
+              animate="show"
+              className="grid grid-cols-2 gap-4"
+            >
+              {quickAccessItems.map((item, index) => {
+                const cardContent = (
+                  <motion.div
+                    variants={fadeUpVariant}
+                    whileHover={hoverGlow}
+                    whileTap={tapEffect}
+                  >
+                    <Card className={cn(
+                      "h-full border shadow-sm transition-all duration-300",
+                      "hover:shadow-lg hover:border-primary/30",
+                      "bg-gradient-to-br hover:bg-gradient-to-br",
+                      item.gradient
+                    )}>
+                      <CardContent className="p-5">
+                        <div className="w-10 h-10 rounded-lg bg-background/80 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                          <item.icon className="h-5 w-5" />
+                        </div>
+                        <h3 className="font-medium text-sm mb-1">{item.title}</h3>
+                        <p className="text-xs text-muted-foreground">{item.description}</p>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+
+                // If plan is not active and item requires plan, show locked version
+                if (item.requiresPlan && !hasActivePlan) {
+                  return (
+                    <FeatureLock key={item.title}>
+                      <div className="group">
+                        {cardContent}
                       </div>
-                      <h3 className="font-medium text-sm mb-1">{item.title}</h3>
-                      <p className="text-xs text-muted-foreground">{item.description}</p>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
+                    </FeatureLock>
+                  );
+                }
+
+                // Otherwise show normal clickable card
+                return (
+                  <Link href={item.href} key={item.title} className="group">
+                    {cardContent}
+                  </Link>
+                );
+              })}
+            </motion.div>
           </div>
 
           {/* Recent Discoveries */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
           <Card className="border shadow-sm">
             <CardHeader className="p-5 pb-0">
               <div className="flex items-center gap-2">
@@ -341,11 +396,17 @@ export default function DashboardPage() {
               )}
             </CardContent>
           </Card>
+          </motion.div>
         </div>
 
         {/* Sidebar */}
-        <div className="lg:col-span-1 space-y-6">
-          <Card className="border shadow-sm">
+        <motion.div 
+          className="lg:col-span-1 space-y-6"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <Card className="border shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="p-5 pb-0">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded bg-secondary">
@@ -411,7 +472,7 @@ export default function DashboardPage() {
           </Card>
 
           {/* Feedback Card */}
-          <Card className="border shadow-sm">
+          <Card className="border shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="p-5">
               <div className="flex items-start gap-3">
                 <div className="p-1.5 rounded bg-primary/10">
@@ -427,30 +488,99 @@ export default function DashboardPage() {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
       </div>
       {/* Social & Contact Section */}
-      <div className="mt-12 flex flex-col items-center gap-4">
-        <Link
-          href="https://www.instagram.com/unipeasy?igsh=NjBteXFzMzloMmFu"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 text-white font-semibold shadow hover:scale-105 transition-transform"
-        >
-          <span className="w-5 h-5">
-            {/* Instagram Icon */}
-            <svg viewBox="0 0 448 512" fill="currentColor" aria-hidden="true" className="w-5 h-5"><path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9 114.9-51.3 114.9-114.9S287.7 141 224.1 141zm0 186c-39.5 0-71.5-32-71.5-71.5s32-71.5 71.5-71.5 71.5 32 71.5 71.5-32 71.5-71.5 71.5zm146.4-194.3c0 14.9-12 26.9-26.9 26.9s-26.9-12-26.9-26.9 12-26.9 26.9-26.9 26.9 12 26.9 26.9zm76.1 27.2c-1.7-35.3-9.9-66.7-36.2-92.1S388.6 1.7 353.3 0C317.5-1.7 130.5-1.7 94.7 0 59.4 1.7 28 9.9 2.7 36.2S1.7 59.4 0 94.7C-1.7 130.5-1.7 317.5 0 353.3c1.7 35.3 9.9 66.7 36.2 92.1s56.8 34.5 92.1 36.2c35.8 1.7 222.8 1.7 258.6 0 35.3-1.7 66.7-9.9 92.1-36.2s34.5-56.8 36.2-92.1c1.7-35.8 1.7-222.8 0-258.6zM398.8 388c-7.8 19.6-22.9 34.7-42.5 42.5-29.4 11.7-99.2 9-132.3 9s-102.9 2.6-132.3-9c-19.6-7.8-34.7-22.9-42.5-42.5-11.7-29.4-9-99.2-9-132.3s-2.6-102.9 9-132.3c7.8-19.6 22.9-34.7 42.5-42.5C123.1 43.2 192.9 45.8 226 45.8s102.9-2.6 132.3 9c19.6 7.8 34.7 22.9 42.5 42.5 11.7 29.4 9 99.2 9 132.3s2.7 102.9-9 132.3z" /></svg>
+      <motion.div 
+        className="mt-12 flex flex-col items-center gap-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+      >
+        <ConnectButtons />
+      </motion.div>
+    </div>
+  );
+}
+
+// Professional Connect Buttons Component
+function ConnectButtons() {
+  const [emailCopied, setEmailCopied] = React.useState(false);
+  const { toast } = useToast();
+
+  const handleCopyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText("theunipeasy@gmail.com");
+      setEmailCopied(true);
+      toast({
+        title: "Email Copied!",
+        description: "theunipeasy@gmail.com has been copied to your clipboard.",
+      });
+      setTimeout(() => setEmailCopied(false), 2000);
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "Failed to copy",
+        description: "Please manually copy: theunipeasy@gmail.com",
+      });
+    }
+  };
+
+  return (
+    <div className="flex flex-col sm:flex-row items-center gap-3">
+      {/* Instagram Button with Gradient */}
+      <motion.a
+        href="https://www.instagram.com/unipeasy?igsh=NjBteXFzMzloMmFu"
+        target="_blank"
+        rel="noopener noreferrer"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="group relative overflow-hidden rounded-xl px-5 py-2.5 transition-all duration-300"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-muted group-hover:bg-transparent transition-colors duration-300" />
+        <div className="absolute inset-[2px] bg-background/95 rounded-[10px] group-hover:bg-background/10 transition-colors duration-300" />
+        
+        <div className="relative flex items-center gap-2">
+          <svg viewBox="0 0 448 512" fill="currentColor" className="w-5 h-5 text-muted-foreground group-hover:text-white transition-colors duration-300">
+            <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9 114.9-51.3 114.9-114.9S287.7 141 224.1 141zm0 186c-39.5 0-71.5-32-71.5-71.5s32-71.5 71.5-71.5 71.5 32 71.5 71.5-32 71.5-71.5 71.5zm146.4-194.3c0 14.9-12 26.9-26.9 26.9s-26.9-12-26.9-26.9 12-26.9 26.9-26.9 26.9 12 26.9 26.9zm76.1 27.2c-1.7-35.3-9.9-66.7-36.2-92.1S388.6 1.7 353.3 0C317.5-1.7 130.5-1.7 94.7 0 59.4 1.7 28 9.9 2.7 36.2S1.7 59.4 0 94.7C-1.7 130.5-1.7 317.5 0 353.3c1.7 35.3 9.9 66.7 36.2 92.1s56.8 34.5 92.1 36.2c35.8 1.7 222.8 1.7 258.6 0 35.3-1.7 66.7-9.9 92.1-36.2s34.5-56.8 36.2-92.1c1.7-35.8 1.7-222.8 0-258.6zM398.8 388c-7.8 19.6-22.9 34.7-42.5 42.5-29.4 11.7-99.2 9-132.3 9s-102.9 2.6-132.3-9c-19.6-7.8-34.7-22.9-42.5-42.5-11.7-29.4-9-99.2-9-132.3s-2.6-102.9 9-132.3c7.8-19.6 22.9-34.7 42.5-42.5C123.1 43.2 192.9 45.8 226 45.8s102.9-2.6 132.3 9c19.6 7.8 34.7 22.9 42.5 42.5 11.7 29.4 9 99.2 9 132.3s2.7 102.9-9 132.3z" />
+          </svg>
+          <span className="font-medium text-muted-foreground group-hover:text-white transition-colors duration-300">
+            @theunipeasy
           </span>
-          <span>Follow us on Instagram</span>
-        </Link>
-        <div className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-gray-100 text-gray-800 font-semibold shadow">
-          <span className="w-5 h-5">
-            {/* Gmail Icon */}
-            <svg viewBox="0 0 512 512" fill="currentColor" aria-hidden="true" className="w-5 h-5"><path d="M502.3 190.8L327.4 338.3c-15.9 13.2-39.1 13.2-55 0L9.7 190.8C3.9 186.1 0 178.7 0 170.7V80c0-26.5 21.5-48 48-48h416c26.5 0 48 21.5 48 48v90.7c0 8-3.9 15.4-9.7 20.1zM464 80c0-8.8-7.2-16-16-16H64c-8.8 0-16 7.2-16 16v61.8l208 172.2 208-172.2V80zm48 90.7c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32V432c0 26.5 21.5 48 48 48h416c26.5 0 48-21.5 48-48V170.7z" /></svg>
-          </span>
-          <span>theunipeasy@gmail.com</span>
         </div>
-      </div>
+      </motion.a>
+
+      <span className="hidden sm:block text-muted-foreground/50">•</span>
+
+      {/* Email Button with Copy */}
+      <motion.button
+        onClick={handleCopyEmail}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="group relative overflow-hidden rounded-xl px-5 py-2.5 transition-all duration-300"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-muted group-hover:bg-transparent transition-colors duration-300" />
+        <div className="absolute inset-[2px] bg-background/95 rounded-[10px] group-hover:bg-primary/5 transition-colors duration-300" />
+        
+        <div className="relative flex items-center gap-2">
+          {emailCopied ? (
+            <>
+              <CheckCircle2 className="w-5 h-5 text-green-500" />
+              <span className="font-medium text-green-500">Copied!</span>
+            </>
+          ) : (
+            <>
+              <Mail className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors duration-300" />
+              <span className="font-medium text-muted-foreground group-hover:text-foreground transition-colors duration-300">
+                theunipeasy@gmail.com
+              </span>
+              <Copy className="w-4 h-4 text-muted-foreground/50 group-hover:text-primary/70 transition-colors duration-300" />
+            </>
+          )}
+        </div>
+      </motion.button>
     </div>
   );
 }

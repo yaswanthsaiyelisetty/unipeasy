@@ -1,10 +1,12 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { BranchInfo } from "@/lib/materials-data";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { hoverGlow, tapEffect } from "@/lib/animations";
 
 // Color mapping for each branch - text/icon colors
 const branchColors: Record<string, { text: string; bg: string }> = {
@@ -96,11 +98,15 @@ export function BranchCard({ branch }: BranchCardProps) {
 
   return (
     <Link href={`/materials/${branch.id}`}>
-      <Card className="group cursor-pointer bg-card hover:shadow-lg dark:hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1 border border-border">
+      <motion.div
+        whileHover={hoverGlow}
+        whileTap={tapEffect}
+      >
+      <Card className="group cursor-pointer bg-card hover:shadow-lg hover:border-primary/30 dark:hover:shadow-primary/5 transition-all duration-300 border border-border">
         <CardContent className="p-6">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-4">
-              <div className={cn("p-2", colors.text)}>
+              <div className={cn("p-2 group-hover:scale-110 transition-transform", colors.text)}>
                 {IconComponent ? (
                   <IconComponent className="h-7 w-7" />
                 ) : (
@@ -120,6 +126,7 @@ export function BranchCard({ branch }: BranchCardProps) {
           </div>
         </CardContent>
       </Card>
+      </motion.div>
     </Link>
   );
 }

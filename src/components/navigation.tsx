@@ -13,7 +13,6 @@ import {
   User,
   LogOut,
   FolderOpen,
-  FileText,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -53,11 +52,6 @@ const navItems = [
     label: "Materials",
   },
   {
-    href: "/my-documents",
-    icon: FileText,
-    label: "My Documents",
-  },
-  {
     href: "/strategist",
     icon: Target,
     label: "Strategist",
@@ -71,6 +65,11 @@ const navItems = [
     href: "/memory-palace",
     icon: BrainCircuit,
     label: "Memory Palace",
+  },
+  {
+    href: "/profile",
+    icon: User,
+    label: "My Profile",
   },
 ];
   // Add About page nav item

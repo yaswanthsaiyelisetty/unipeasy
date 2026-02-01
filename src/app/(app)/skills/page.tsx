@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { PageHeader } from "@/components/page-header";
 import {
   Card,
@@ -19,8 +20,10 @@ import { skillTracks, branches, type Branch, type SkillTrack } from "@/lib/skill
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/auth-context";
 import { getAllUserSkillsProgress, type SkillProgress } from "@/lib/analytics";
+import { PlanGuard } from "@/components/plan-guard";
+import { staggerContainer, fadeUpVariant, hoverGlow, tapEffect } from "@/lib/animations";
 
-export default function SkillsPage() {
+function SkillsContent() {
   const [selectedBranch, setSelectedBranch] = useState<Branch | 'All'>('All');
   const [mounted, setMounted] = useState(false);
   const [skillsProgress, setSkillsProgress] = useState<Record<string, SkillProgress>>({});
@@ -155,16 +158,26 @@ export default function SkillsPage() {
         </div>
       )}
       
-      <div className="grid gap-3 sm:gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <motion.div 
+        variants={staggerContainer}
+        initial="hidden"
+        animate="show"
+        className="grid gap-3 sm:gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+      >
         {filteredTracks.map((track: Omit<SkillTrack, 'journey'>, index: number) => {
           const progress = getProgressPercentage(track.slug);
           const isStarted = skillsProgress[track.slug] !== undefined;
           
           return (
+            <motion.div
+              key={track.slug}
+              variants={fadeUpVariant}
+              whileHover={hoverGlow}
+              whileTap={tapEffect}
+            >
             <Card 
-              key={track.slug} 
               className={cn(
-                "group flex flex-col border shadow-sm hover:shadow-md transition-all duration-300",
+                "group flex flex-col border shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-300",
                 mounted && "animate-in fade-in slide-in-from-bottom-4",
               )}
               style={{ animationDelay: `${index * 50}ms` }}
@@ -217,9 +230,11 @@ export default function SkillsPage() {
                       <span className="font-medium">{progress}%</span>
                     </div>
                     <div className="h-1.5 sm:h-2 bg-muted rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-primary rounded-full transition-all duration-500"
-                        style={{ width: `${progress}%` }}
+                      <motion.div 
+                        className="h-full bg-primary rounded-full"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progress}%` }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
                       />
                     </div>
                   </div>
@@ -227,20 +242,25 @@ export default function SkillsPage() {
               </CardContent>
               
               <CardFooter className="p-3 sm:p-4 md:p-6 pt-0">
-                <Button asChild variant={isStarted ? "default" : "outline"} className="w-full h-8 sm:h-9 text-xs sm:text-sm">
+                <Button asChild variant={isStarted ? "default" : "outline"} className="w-full h-8 sm:h-9 text-xs sm:text-sm group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                   <Link href={`/skills/${track.slug}`}>
                     {isStarted ? "Continue" : "Start Training"}
-                    <ArrowRight className="ml-1.5 sm:ml-2 w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <ArrowRight className="ml-1.5 sm:ml-2 w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </Button>
               </CardFooter>
             </Card>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
 
       {filteredTracks.length === 0 && (
-        <div className="text-center py-16 border border-dashed rounded-lg">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center py-16 border border-dashed rounded-lg"
+        >
           <p className="text-muted-foreground">No skills found for this branch.</p>
           <Button 
             variant="link" 
@@ -249,8 +269,16 @@ export default function SkillsPage() {
           >
             View all skills
           </Button>
-        </div>
+        </motion.div>
       )}
     </div>
+  );
+}
+
+export default function SkillsPage() {
+  return (
+    <PlanGuard>
+      <SkillsContent />
+    </PlanGuard>
   );
 }

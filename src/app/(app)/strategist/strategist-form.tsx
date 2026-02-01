@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { motion } from "framer-motion";
 import {
   createPersonalizedStudyPlan,
   type CreatePersonalizedStudyPlanOutput,
@@ -24,6 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { staggerContainer, fadeUpVariant } from "@/lib/animations";
 
 const strategistSchema = z.object({
   syllabus: z.string().min(10, "Please enter the syllabus content."),
@@ -87,10 +89,16 @@ export function StrategistForm() {
   };
 
   return (
-    <div className="space-y-8">
+    <motion.div 
+      className="space-y-8"
+      initial="hidden"
+      animate="show"
+      variants={staggerContainer}
+    >
       <div className="grid lg:grid-cols-5 gap-6">
         {/* Input Form */}
-        <Card className="lg:col-span-3 border shadow-sm">
+        <motion.div variants={fadeUpVariant} className="lg:col-span-3">
+        <Card className="border shadow-sm hover:shadow-md transition-shadow">
           <CardContent className="p-6">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
@@ -228,17 +236,24 @@ export function StrategistForm() {
                   )}
                 />
                 
-                <Button type="submit" disabled={loading} className="w-full">
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Generate Study Plan
-                </Button>
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90">
+                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Generate Study Plan
+                  </Button>
+                </motion.div>
               </form>
             </Form>
           </CardContent>
         </Card>
+        </motion.div>
 
         {/* Results Panel */}
-        <Card className="lg:col-span-2 border shadow-sm">
+        <motion.div variants={fadeUpVariant} className="lg:col-span-2">
+        <Card className="border shadow-sm hover:shadow-md transition-shadow">
           <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-5">
                 <div className="p-1.5 rounded bg-secondary">
@@ -290,16 +305,21 @@ export function StrategistForm() {
               
               {!loading && !result && (
                   <div className="text-center py-12 px-4">
-                      <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-secondary flex items-center justify-center">
+                      <motion.div 
+                        className="w-14 h-14 mx-auto mb-4 rounded-full bg-secondary flex items-center justify-center"
+                        animate={{ y: [0, -5, 0] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      >
                         <Target className="w-7 h-7 text-muted-foreground" />
-                      </div>
+                      </motion.div>
                       <p className="font-medium">Ready to plan?</p>
                       <p className="text-muted-foreground mt-1 text-sm">Fill out the form to generate your study schedule.</p>
                   </div>
               )}
           </CardContent>
         </Card>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }

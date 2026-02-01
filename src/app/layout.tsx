@@ -6,8 +6,47 @@ import { AuthProvider } from '@/context/auth-context';
 import { ThemeProvider } from '@/components/theme-provider';
 
 export const metadata: Metadata = {
-  title: 'UniPeasy',
-  description: 'AI-Powered Learning Platform',
+  metadataBase: new URL("https://unipeasy.com"),
+  title: "UniPeasy — The AI-Powered StudyHub for Engineering Students",
+  description: "A centralized platform providing topper-verified notes, AI-driven study plans, and exam strategies to help engineering students bridge the gap to a successful career.",
+  keywords: [
+    "Study Materials",
+    "Engineering Notes",
+    "Yaswanth Sai Yelisetty",
+    "AI Study Assistant",
+    "Exam Strategies",
+    "Engineering Success",
+    "UniPeasy",
+    "unipeasy",
+    "Unipeasy",
+    "material pdfs",
+    "best site for study",
+    "btech materials",
+    "btech notes",
+  ],
+  authors: [{ name: "Yelisetty Yaswanth Sai" }],
+  openGraph: {
+    title: "UniPeasy — Revolutionizing Academic Success",
+    description: "Access verified resources and AI tools designed for the modern engineer.",
+    url: "https://unipeasy.com",
+    siteName: "UniPeasy",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "UniPeasy Dashboard Preview",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "UniPeasy — Study smarter, not harder.",
+    description: "The ultimate AI companion for engineering students.",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({
