@@ -21,6 +21,7 @@ import {
   Mail,
   Copy,
   CheckCircle2,
+  Info,
 } from "lucide-react";
 import {
   Card,
@@ -90,6 +91,15 @@ const quickAccessItems = [
     requiresPlan: true,
     gradient: "from-red-500/10 to-rose-500/10",
     iconColor: "text-red-400",
+  },
+  {
+    title: "About UniPeasy",
+    href: "/about",
+    icon: Info,
+    description: "Meet the team",
+    requiresPlan: false,
+    gradient: "from-cyan-500/10 to-teal-500/10",
+    iconColor: "text-cyan-400",
   },
 ];
 
