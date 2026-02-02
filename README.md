@@ -137,7 +137,7 @@ src/
 ## Checkout The Sample Website
 
 ```
-unipeasy-five.vercel.app
+unipeasy.com
 ```
 
 ---
