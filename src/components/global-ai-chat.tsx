@@ -1,25 +1,27 @@
 "use client";
 
 import * as React from "react";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  MessageCircle, 
-  Send, 
-  Sparkles, 
-  X, 
-  Loader2, 
-  Bot, 
-  User, 
+import {
+  MessageCircle,
+  Send,
+  Sparkles,
+  X,
+  Loader2,
+  Bot,
+  User,
   Crown,
   Minimize2,
   Maximize2,
   Trash2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import ReactMarkdown from "react-markdown";
 import { usePlan } from "@/context/plan-context";
 import { answerStudentQuestion } from "@/ai/flows/answer-student-question";
 
@@ -33,6 +35,7 @@ interface Message {
 
 export function GlobalAIChat() {
   const { hasActivePlan, openClaimModal } = usePlan();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = React.useState(false);
   const [isMinimized, setIsMinimized] = React.useState(false);
   const [question, setQuestion] = React.useState("");
@@ -41,6 +44,30 @@ export function GlobalAIChat() {
   const [isExpanded, setIsExpanded] = React.useState(false);
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLTextAreaElement>(null);
+  const abortControllerRef = React.useRef<AbortController | null>(null);
+
+  // Close chat on route change (navigation listener)
+  React.useEffect(() => {
+    if (isOpen) {
+      setIsOpen(false);
+      setIsMinimized(false);
+      // Cancel any ongoing API request
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+        setIsLoading(false);
+      }
+    }
+  }, [pathname]);
+
+  // Cleanup on unmount
+  React.useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   // Scroll to bottom when new messages arrive
   React.useEffect(() => {
@@ -55,6 +82,18 @@ export function GlobalAIChat() {
       inputRef.current.focus();
     }
   }, [isOpen, isMinimized]);
+
+  // Close chat handler with cleanup
+  const handleCloseChat = React.useCallback(() => {
+    setIsOpen(false);
+    setIsMinimized(false);
+    // Cancel any ongoing API request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+      setIsLoading(false);
+    }
+  }, []);
 
   const handleSubmit = async (submittedQuestion?: string) => {
     const q = submittedQuestion || question;
@@ -77,9 +116,17 @@ export function GlobalAIChat() {
     setQuestion("");
     setIsLoading(true);
 
+    // Create abort controller for this request
+    abortControllerRef.current = new AbortController();
+
     try {
       const response = await answerStudentQuestion({ question: q.trim() });
-      
+
+      // Check if request was aborted
+      if (abortControllerRef.current?.signal.aborted) {
+        return;
+      }
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
@@ -90,6 +137,11 @@ export function GlobalAIChat() {
 
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
+      // Don't show error if request was aborted
+      if (abortControllerRef.current?.signal.aborted) {
+        return;
+      }
+
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
@@ -98,7 +150,10 @@ export function GlobalAIChat() {
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
-      setIsLoading(false);
+      if (!abortControllerRef.current?.signal.aborted) {
+        setIsLoading(false);
+      }
+      abortControllerRef.current = null;
     }
   };
 
@@ -134,39 +189,48 @@ export function GlobalAIChat() {
               className="relative"
             >
               <Button
-                size="lg"
+                size="sm"
                 onClick={() => setIsOpen(true)}
                 className={cn(
-                  "h-14 rounded-full shadow-lg shadow-primary/25",
+                  "h-10 rounded-full shadow-lg shadow-primary/25",
                   "bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90",
                   "transition-all duration-300",
-                  isExpanded ? "w-auto px-6" : "w-14"
+                  isExpanded ? "w-auto px-4" : "w-10"
                 )}
                 onMouseEnter={() => setIsExpanded(true)}
                 onMouseLeave={() => setIsExpanded(false)}
               >
-                <Sparkles className="h-6 w-6" />
+                <Sparkles className="h-4 w-4" />
                 <AnimatePresence>
                   {isExpanded && (
                     <motion.span
                       initial={{ opacity: 0, width: 0 }}
                       animate={{ opacity: 1, width: "auto" }}
                       exit={{ opacity: 0, width: 0 }}
-                      className="ml-2 overflow-hidden whitespace-nowrap font-medium"
+                      className="ml-2 overflow-hidden whitespace-nowrap font-medium text-sm"
                     >
                       Ask AI
                     </motion.span>
                   )}
                 </AnimatePresence>
               </Button>
-              
-              {/* Pulse animation */}
-              <span className="absolute inset-0 rounded-full bg-primary/30 animate-ping pointer-events-none" />
-              
-              {/* Glow effect */}
-              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/40 to-purple-600/40 blur-xl -z-10 animate-pulse" />
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Backdrop Overlay - Click to close */}
+      <AnimatePresence>
+        {isOpen && !isMinimized && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[2px] md:bg-transparent md:backdrop-blur-none"
+            onClick={handleCloseChat}
+            aria-hidden="true"
+          />
         )}
       </AnimatePresence>
 
@@ -175,9 +239,9 @@ export function GlobalAIChat() {
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ 
-              opacity: 1, 
-              scale: 1, 
+            animate={{
+              opacity: 1,
+              scale: 1,
               y: 0,
               height: isMinimized ? "auto" : "min(600px, 80vh)",
             }}
@@ -191,6 +255,7 @@ export function GlobalAIChat() {
               "shadow-2xl shadow-black/20",
               "flex flex-col overflow-hidden"
             )}
+            onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-primary/10 to-purple-500/10">
@@ -206,7 +271,7 @@ export function GlobalAIChat() {
                   <p className="text-xs text-muted-foreground">Always here to help</p>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-1">
                 {messages.length > 0 && (
                   <Button
@@ -229,7 +294,7 @@ export function GlobalAIChat() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setIsOpen(false)}
+                  onClick={handleCloseChat}
                   className="h-8 w-8 text-muted-foreground hover:text-foreground"
                 >
                   <X className="h-4 w-4" />
@@ -242,7 +307,7 @@ export function GlobalAIChat() {
               <>
                 {/* Plan Gate Banner */}
                 {!hasActivePlan && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="p-3 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-b"
@@ -252,8 +317,8 @@ export function GlobalAIChat() {
                         <Crown className="h-4 w-4 text-amber-500" />
                         <span className="text-xs">Unlock unlimited AI assistance</span>
                       </div>
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         onClick={openClaimModal}
                         className="h-7 text-xs bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
                       >
@@ -326,8 +391,14 @@ export function GlobalAIChat() {
                                 : "bg-muted rounded-bl-md"
                             )}
                           >
-                            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                            
+                            {message.role === "assistant" ? (
+                              <div className="prose prose-sm prose-neutral dark:prose-invert max-w-none prose-headings:text-primary prose-headings:font-semibold prose-h2:text-base prose-h2:mt-2 prose-h2:mb-1 prose-ul:my-1 prose-li:my-0 prose-p:my-1 prose-p:leading-relaxed [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                                <ReactMarkdown>{message.content}</ReactMarkdown>
+                              </div>
+                            ) : (
+                              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                            )}
+
                             {/* Follow-up suggestions */}
                             {message.suggestions && message.suggestions.length > 0 && (
                               <div className="mt-3 pt-3 border-t border-border/50 space-y-2">
@@ -355,7 +426,7 @@ export function GlobalAIChat() {
                           )}
                         </motion.div>
                       ))}
-                      
+
                       {/* Loading indicator */}
                       {isLoading && (
                         <motion.div
@@ -417,3 +488,4 @@ export function GlobalAIChat() {
     </>
   );
 }
+

@@ -127,10 +127,10 @@ export function LearnForm() {
         } : undefined,
       });
       setResult(explanation);
-      
+
       // Add to search history
       addToSearchHistory(values.topic);
-      
+
       // Track topic learned
       if (user?.uid) {
         try {
@@ -164,15 +164,15 @@ export function LearnForm() {
   const handleSave = (type: 'Explanation' | 'Analogy' | 'Mind Map', content: string) => {
     if (!result) return;
     addMemoryItem({
-        id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-        title: `${result.simpleExplanation.substring(0,20)}... - ${type}`,
-        content,
-        type,
-        topic: form.getValues('topic')
+      id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      title: `${result.simpleExplanation.substring(0, 20)}... - ${type}`,
+      content,
+      type,
+      topic: form.getValues('topic')
     });
     toast({
-        title: "Saved to Memory Palace!",
-        description: `Your ${type.toLowerCase()} for "${form.getValues('topic')}" has been saved.`
+      title: "Saved to Memory Palace!",
+      description: `Your ${type.toLowerCase()} for "${form.getValues('topic')}" has been saved.`
     })
   }
 
@@ -220,10 +220,10 @@ export function LearnForm() {
                         What do you want to learn?
                       </FormLabel>
                       {hasSetPreferences && (
-                        <Button 
-                          type="button" 
-                          variant="ghost" 
-                          size="sm" 
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
                           onClick={() => setShowInterestsDialog(true)}
                           className="text-xs"
                         >
@@ -267,7 +267,7 @@ export function LearnForm() {
                   </FormItem>
                 )}
               />
-              
+
               {/* Search History Dropdown */}
               {showHistory && searchHistory.length > 0 && (
                 <div className="border rounded-lg p-3 bg-muted/30 space-y-2">
@@ -318,7 +318,7 @@ export function LearnForm() {
                   </div>
                 </div>
               )}
-              
+
               <Button type="submit" disabled={loading} className="w-full h-11">
                 {loading ? (
                   <>
@@ -369,8 +369,8 @@ export function LearnForm() {
             </CardHeader>
             {showStoryVideo && (
               <CardContent className="pt-0">
-                <AnimatedStoryVideo 
-                  topic={form.getValues('topic')} 
+                <AnimatedStoryVideo
+                  topic={form.getValues('topic')}
                   explanation={result.simpleExplanation}
                   analogy={result.analogy}
                 />
@@ -393,7 +393,7 @@ export function LearnForm() {
               <TextToSpeechButton text={result.simpleExplanation} />
             </CardHeader>
             <CardContent>
-              <div className="prose prose-neutral dark:prose-invert max-w-none prose-p:leading-relaxed">
+              <div className="prose prose-neutral dark:prose-invert max-w-none prose-headings:text-primary prose-headings:font-semibold prose-h2:text-lg prose-h2:mt-4 prose-h2:mb-2 prose-ul:my-2 prose-li:my-0.5 prose-p:my-2 prose-p:leading-relaxed">
                 <ReactMarkdown>{result.simpleExplanation}</ReactMarkdown>
               </div>
             </CardContent>
@@ -420,7 +420,7 @@ export function LearnForm() {
               <TextToSpeechButton text={result.analogy} />
             </CardHeader>
             <CardContent>
-              <div className="prose prose-neutral dark:prose-invert max-w-none prose-p:leading-relaxed">
+              <div className="prose prose-neutral dark:prose-invert max-w-none prose-p:my-2 prose-p:leading-relaxed prose-strong:text-primary prose-ul:my-2 prose-li:my-0.5">
                 <ReactMarkdown>{result.analogy}</ReactMarkdown>
               </div>
             </CardContent>
@@ -455,7 +455,7 @@ export function LearnForm() {
               </Button>
             </CardFooter>
           </Card>
-          
+
           {/* Quiz */}
           <Card className="border shadow-sm">
             <CardHeader className="flex flex-row items-center gap-3 space-y-0">

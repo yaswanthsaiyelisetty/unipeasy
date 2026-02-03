@@ -11,6 +11,7 @@ import {
   FolderOpen,
   Lightbulb,
   ArrowRight,
+  ArrowLeft,
   CheckCircle2,
   Users,
   BookOpen,
@@ -43,15 +44,15 @@ const founder = {
 };
 
 const coFounders = [
-  { 
-    name: "T.G.S. Sri Ram", 
-    role: "Co-Founder", 
+  {
+    name: "T.G.S. Sri Ram",
+    role: "Co-Founder",
     description: "Team Manager & Backend Developer. Architecting robust systems that power seamless learning experiences.",
     image: "/team/sriram.jpg",
   },
-  { 
-    name: "Vaishnavi", 
-    role: "Co-Founder", 
+  {
+    name: "Vaishnavi",
+    role: "Co-Founder",
     description: "Contributor Lead & Onboarding Specialist. Building bridges between students and opportunities.",
     image: "/team/vaishnavi.jpg",
   },
@@ -130,7 +131,7 @@ function useTypewriter(text: string, speed: number = 50) {
     let i = 0;
     setDisplayText("");
     setIsComplete(false);
-    
+
     const timer = setInterval(() => {
       if (i < text.length) {
         setDisplayText(text.slice(0, i + 1));
@@ -172,7 +173,7 @@ function ConnectSection() {
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -191,7 +192,7 @@ function ConnectSection() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         <div className="absolute inset-0 bg-muted group-hover:bg-transparent transition-colors duration-300" />
         <div className="absolute inset-[2px] bg-background/95 rounded-[10px] group-hover:bg-background/10 transition-colors duration-300" />
-        
+
         <div className="relative flex items-center gap-3">
           <Instagram className="h-5 w-5 text-muted-foreground group-hover:text-white transition-colors duration-300" />
           <span className="font-medium text-muted-foreground group-hover:text-white transition-colors duration-300">
@@ -212,7 +213,7 @@ function ConnectSection() {
         <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         <div className="absolute inset-0 bg-muted group-hover:bg-transparent transition-colors duration-300" />
         <div className="absolute inset-[2px] bg-background/95 rounded-[10px] group-hover:bg-primary/5 transition-colors duration-300" />
-        
+
         <div className="relative flex items-center gap-3">
           {emailCopied ? (
             <>
@@ -246,11 +247,21 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Back Navigation Button */}
+      <div className="fixed top-4 left-4 z-50">
+        <Button asChild variant="outline" size="sm" className="gap-2 shadow-md bg-background/80 backdrop-blur-sm">
+          <Link href="/dashboard">
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Link>
+        </Button>
+      </div>
+
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 sm:py-32">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-purple-500/5 to-pink-500/5" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
-        
+
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -276,7 +287,7 @@ export default function AboutPage() {
             transition={{ delay: 2, duration: 0.5 }}
             className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto mb-8"
           >
-            One centralized platform for the modern student. Verified materials, 
+            One centralized platform for the modern student. Verified materials,
             AI-powered strategies, and industry-level skill tracks—all in one place.
           </motion.p>
 
@@ -303,7 +314,7 @@ export default function AboutPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <Quote className="h-10 w-10 text-primary/40 mx-auto mb-6" />
           <blockquote className="text-xl sm:text-2xl font-medium italic text-foreground/80">
-            &quot;Unipeasy is not just about notes; it is about empowering students with 
+            &quot;Unipeasy is not just about notes; it is about empowering students with
             clarity, confidence, and convenience in their academic journey.&quot;
           </blockquote>
         </div>
@@ -546,8 +557,8 @@ export default function AboutPage() {
                           {member.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
                         </AvatarFallback>
                       </Avatar>
-                      <Badge 
-                        variant="secondary" 
+                      <Badge
+                        variant="secondary"
                         className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
                       >
                         {member.badge}
@@ -581,8 +592,8 @@ export default function AboutPage() {
                           {member.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
                         </AvatarFallback>
                       </Avatar>
-                      <Badge 
-                        variant="outline" 
+                      <Badge
+                        variant="outline"
                         className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         {member.badge}
@@ -613,7 +624,7 @@ export default function AboutPage() {
               <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
                 Get instant access to all AI-powered features and verified study materials.
               </p>
-              
+
               <div className="flex items-center justify-center gap-4 mb-8">
                 <span className="text-3xl text-muted-foreground line-through">₹300</span>
                 <span className="text-5xl font-bold text-green-500">₹0</span>
@@ -638,10 +649,10 @@ export default function AboutPage() {
       <section className="py-12 border-t">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <blockquote className="text-lg italic text-muted-foreground mb-8">
-            &quot;Unipeasy is built by students, for students, growing as a national movement 
+            &quot;Unipeasy is built by students, for students, growing as a national movement
             of empowerment and innovation.&quot;
           </blockquote>
-          
+
           {/* Connect Section */}
           <ConnectSection />
         </div>

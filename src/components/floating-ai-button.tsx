@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { MessageCircle, Send, Sparkles, X, Loader2 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface FloatingAIButtonProps {
@@ -69,25 +70,25 @@ export function FloatingAIButton({
             whileTap={{ scale: 0.95 }}
           >
             <Button
-              size="lg"
+              size="sm"
               onClick={() => setIsOpen(true)}
               className={cn(
-                "h-14 rounded-full shadow-lg",
+                "h-10 rounded-full shadow-lg",
                 "bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90",
                 "transition-all duration-300",
-                isExpanded ? "w-auto px-6" : "w-14"
+                isExpanded ? "w-auto px-4" : "w-10"
               )}
               onMouseEnter={() => setIsExpanded(true)}
               onMouseLeave={() => setIsExpanded(false)}
             >
-              <MessageCircle className="h-6 w-6" />
+              <MessageCircle className="h-4 w-4" />
               <AnimatePresence>
                 {isExpanded && (
                   <motion.span
                     initial={{ opacity: 0, width: 0 }}
                     animate={{ opacity: 1, width: "auto" }}
                     exit={{ opacity: 0, width: 0 }}
-                    className="ml-2 overflow-hidden whitespace-nowrap"
+                    className="ml-2 overflow-hidden whitespace-nowrap text-sm"
                   >
                     Ask AI
                   </motion.span>
@@ -95,9 +96,6 @@ export function FloatingAIButton({
               </AnimatePresence>
             </Button>
           </motion.div>
-          
-          {/* Pulse animation */}
-          <span className="absolute inset-0 rounded-full bg-primary/30 animate-ping pointer-events-none" />
         </motion.div>
       </AnimatePresence>
 
@@ -163,9 +161,9 @@ export function FloatingAIButton({
                     </div>
                     <div className="flex-grow">
                       <p className="text-sm font-medium mb-1">AI Response</p>
-                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                        {answer}
-                      </p>
+                      <div className="prose prose-sm prose-neutral dark:prose-invert max-w-none prose-headings:text-primary prose-headings:font-semibold prose-h2:text-base prose-h2:mt-3 prose-h2:mb-1 prose-ul:my-1 prose-li:my-0 prose-p:my-1 prose-p:leading-relaxed text-muted-foreground">
+                        <ReactMarkdown>{answer}</ReactMarkdown>
+                      </div>
                     </div>
                   </div>
                 </motion.div>

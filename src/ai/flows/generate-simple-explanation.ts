@@ -8,8 +8,8 @@
  * - GenerateSimpleExplanationOutput - The return type for the generateSimpleExplanation function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 
 const UserInterestsSchema = z.object({
   learningStyle: z.enum(['visual', 'auditory', 'reading', 'kinesthetic']).optional(),
@@ -62,7 +62,7 @@ export async function generateSimpleExplanation(
 
 const explanationPrompt = ai.definePrompt({
   name: 'generateSimpleExplanationPrompt',
-  input: {schema: GenerateSimpleExplanationInputSchema},
+  input: { schema: GenerateSimpleExplanationInputSchema },
   output: {
     schema: GenerateSimpleExplanationOutputSchema,
   },
@@ -142,11 +142,11 @@ const generateSimpleExplanationFlow = ai.defineFlow(
     outputSchema: GenerateSimpleExplanationOutputSchema,
   },
   async input => {
-    const {output} = await explanationPrompt(input);
+    const { output } = await explanationPrompt(input);
     if (!output) {
       throw new Error('Failed to generate explanation.');
     }
-    
+
     return output;
   }
 );

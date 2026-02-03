@@ -8,8 +8,8 @@
  * - GenerateEvenSimplerExplanationOutput - The return type for the function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 
 const GenerateEvenSimplerExplanationInputSchema = z.object({
   topic: z.string().describe('The complex topic to be re-explained in the simplest possible terms.'),
@@ -32,20 +32,32 @@ export async function generateEvenSimplerExplanation(
 
 const simplerExplanationPrompt = ai.definePrompt({
   name: 'generateEvenSimplerExplanationPrompt',
-  input: {schema: GenerateEvenSimplerExplanationInputSchema},
+  input: { schema: GenerateEvenSimplerExplanationInputSchema },
   output: {
     schema: GenerateEvenSimplerExplanationOutputSchema,
   },
-  prompt: `You are an expert educator, specializing in making very complex topics extremely simple. A student has just failed a quiz on the topic of "{{{topic}}}".
+  prompt: `You are an expert educator who makes complex topics EXTREMELY simple. A student failed a quiz on "{{{topic}}}" and needs a simpler explanation.
 
-  Your task is to re-explain the topic in the simplest possible terms. Assume they have no prior knowledge. Use very basic language and a concrete, relatable analogy. Avoid all jargon. Keep it short and focused on the absolute core concept.
-  
-  **FORMATTING RULES:**
-  - Use **bold** for the most important key terms (2-3 terms max)
-  - Break into 2-3 short paragraphs for easy reading
-  - Start with a one-sentence summary
-  - Use bullet points if listing anything
-  - Keep sentences short and simple`,
+  **YOUR TASK:** Re-explain in the SIMPLEST possible terms. Assume ZERO prior knowledge.
+
+  **USE THIS EXACT FORMAT:**
+
+  ## 🎯 In One Sentence
+  (Define the concept in ONE simple sentence a 10-year-old would understand)
+
+  ## 🏠 Real-Life Example
+  (Give ONE concrete, everyday example - max 2 sentences)
+
+  ## 🔑 The 3 Things to Remember
+  - Point 1 (max 10 words)
+  - Point 2 (max 10 words)
+  - Point 3 (max 10 words)
+
+  **RULES:**
+  - NO jargon or technical terms
+  - Use **bold** only for 2-3 key words
+  - Keep TOTAL response under 100 words
+  - Use simple, everyday language`,
 });
 
 const generateEvenSimplerExplanationFlow = ai.defineFlow(
@@ -55,11 +67,11 @@ const generateEvenSimplerExplanationFlow = ai.defineFlow(
     outputSchema: GenerateEvenSimplerExplanationOutputSchema,
   },
   async input => {
-    const {output} = await simplerExplanationPrompt(input);
+    const { output } = await simplerExplanationPrompt(input);
     if (!output) {
       throw new Error('Failed to generate a simpler explanation.');
     }
-    
+
     return output;
   }
 );
