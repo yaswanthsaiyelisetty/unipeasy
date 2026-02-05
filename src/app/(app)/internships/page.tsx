@@ -8,7 +8,9 @@ import { PageHeader } from "@/components/page-header";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { InternshipCard } from "@/components/internships/internship-card";
+import { SuggestInternshipModal } from "@/components/internships/suggest-internship-modal";
 import {
     Internship,
     InternshipCategory,
@@ -21,7 +23,9 @@ import {
     Shield,
     Loader2,
     TrendingUp,
-    Clock
+    Clock,
+    Lightbulb,
+    Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { staggerContainer, fadeUpVariant } from "@/lib/animations";
@@ -33,6 +37,7 @@ export default function InternshipsPage() {
     const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState<FilterCategory>("all");
     const [mounted, setMounted] = useState(false);
+    const [suggestModalOpen, setSuggestModalOpen] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -83,9 +88,31 @@ export default function InternshipsPage() {
             "space-y-4 sm:space-y-6 md:space-y-8 transition-all duration-500",
             mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
         )}>
-            <PageHeader
-                title="Internships"
-                description="Verified internship opportunities curated for your success."
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <PageHeader
+                    title="Internships"
+                    description="Verified internship opportunities curated for your success."
+                />
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2 }}
+                >
+                    <Button
+                        onClick={() => setSuggestModalOpen(true)}
+                        className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/25 gap-2 group"
+                    >
+                        <Lightbulb className="h-4 w-4 group-hover:rotate-12 transition-transform" />
+                        Suggest an Internship
+                        <Sparkles className="h-3 w-3 opacity-70" />
+                    </Button>
+                </motion.div>
+            </div>
+
+            {/* Suggest Internship Modal */}
+            <SuggestInternshipModal
+                open={suggestModalOpen}
+                onOpenChange={setSuggestModalOpen}
             />
 
             {/* Trust Banner */}
