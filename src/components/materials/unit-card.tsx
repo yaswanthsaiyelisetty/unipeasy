@@ -29,7 +29,7 @@ export function UnitCard({ unit, subjectId, subjectTitle, branch, year }: UnitCa
         year: year || "",
       });
     }
-    
+
     // Handle data URLs by triggering download instead of navigation
     if (unit.drive_link.startsWith('data:')) {
       const link = document.createElement('a');
@@ -54,11 +54,6 @@ export function UnitCard({ unit, subjectId, subjectTitle, branch, year }: UnitCa
             <FileText className="h-6 w-6" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded">
-                Unit {unit.unit_number}
-              </span>
-            </div>
             <h3 className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors line-clamp-2">
               {unit.unit_title}
             </h3>

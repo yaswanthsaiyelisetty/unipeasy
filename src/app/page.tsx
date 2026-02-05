@@ -1,8 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { Loader2 } from "lucide-react";
 import {
   Rocket,
   Sparkles,
@@ -87,8 +91,25 @@ const planBenefits = [
 ];
 
 export default function HomePage() {
+  const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // Check if user is already logged in and redirect to dashboard
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is logged in, redirect to dashboard
+        router.replace("/dashboard");
+      } else {
+        // User is not logged in, show the home page
+        setAuthLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -105,6 +126,15 @@ export default function HomePage() {
     }
     setMobileMenuOpen(false);
   };
+
+  // Show loading screen while checking auth state
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <Loader2 className="w-12 h-12 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

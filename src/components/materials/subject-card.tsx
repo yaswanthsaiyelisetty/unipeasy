@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Subject } from "@/lib/materials-data";
 import { ChevronRight, BookOpen } from "lucide-react";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 
 interface SubjectCardProps {
   subject: Subject;
@@ -22,9 +21,6 @@ export function SubjectCard({ subject, branchId, yearId }: SubjectCardProps) {
               <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white">
                 <BookOpen className="h-6 w-6" />
               </div>
-              <Badge variant="secondary" className="text-xs">
-                {subject.units.length} Units
-              </Badge>
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors line-clamp-2">

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lock, Shield, LogOut, BookOpen, BarChart3, Users, Menu, X, MessageSquare } from "lucide-react";
+import { Lock, Shield, LogOut, BookOpen, BarChart3, Users, Menu, X, MessageSquare, Briefcase } from "lucide-react";
 import Link from "next/link";
 import {
   Sheet,
@@ -16,7 +16,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD ;
+const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
 const AUTH_KEY = "admin_authenticated";
 
 export default function AdminLayout({
@@ -37,6 +37,7 @@ export default function AdminLayout({
     { href: "/admin/users", label: "Users", icon: Users },
     { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
     { href: "/admin/feedback", label: "Feedback", icon: MessageSquare },
+    { href: "/admin/internships", label: "Internships", icon: Briefcase },
   ];
 
   useEffect(() => {

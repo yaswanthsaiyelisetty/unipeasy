@@ -141,9 +141,9 @@ export default function SubjectPage() {
 
       <div className="mb-6">
         <h2 className="text-lg font-semibold text-foreground mb-4">
-          Unit-wise Study Materials ({subject.units.length} Units)
+          Study Materials
         </h2>
-        
+
         {subject.units.length === 0 ? (
           <div className="text-center py-12 bg-card rounded-lg border border-border">
             <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -159,8 +159,8 @@ export default function SubjectPage() {
             {subject.units
               .sort((a, b) => a.unit_number - b.unit_number)
               .map((unit) => (
-                <UnitCard 
-                  key={unit.unit_number} 
+                <UnitCard
+                  key={unit.unit_number}
                   unit={unit}
                   subjectId={subjectId}
                   subjectTitle={subject.title}

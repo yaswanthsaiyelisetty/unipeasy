@@ -541,34 +541,41 @@ export default function AboutPage() {
           <div className="mb-12">
             <h3 className="text-lg font-semibold text-center mb-6">Core Management & Development</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-lg mx-auto">
-              {coreTeam.map((member, i) => (
-                <motion.div
-                  key={member.name}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  viewport={{ once: true }}
-                  className="group"
-                >
-                  <Card className="text-center p-4 h-full hover:border-primary/30 transition-all duration-300 hover:shadow-md">
-                    <div className="relative inline-block">
-                      <Avatar className="h-16 w-16 mx-auto mb-3 group-hover:scale-105 transition-transform">
-                        <AvatarFallback className="bg-primary/10 text-sm">
-                          {member.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <Badge
-                        variant="secondary"
-                        className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
-                      >
+              {coreTeam.map((member, i) => {
+                const getBadgeStyle = (badge: string) => {
+                  switch (badge) {
+                    case 'Outreach': return 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0';
+                    case 'Research': return 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0';
+                    case 'Development': return 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-0';
+                    default: return 'bg-gradient-to-r from-primary to-purple-500 text-white border-0';
+                  }
+                };
+                return (
+                  <motion.div
+                    key={member.name}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    viewport={{ once: true }}
+                    className="group"
+                  >
+                    <Card className="text-center p-4 h-full hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                      <div className="relative inline-block">
+                        <Avatar className="h-16 w-16 mx-auto mb-3 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all">
+                          <AvatarFallback className="bg-gradient-to-br from-primary/20 to-purple-500/20 text-sm font-semibold">
+                            {member.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                      </div>
+                      <h4 className="font-semibold text-sm">{member.name}</h4>
+                      <p className="text-xs text-muted-foreground mb-2">{member.role}</p>
+                      <Badge className={cn("text-[10px] px-2.5 py-0.5 font-medium shadow-sm", getBadgeStyle(member.badge))}>
                         {member.badge}
                       </Badge>
-                    </div>
-                    <h4 className="font-medium text-sm">{member.name}</h4>
-                    <p className="text-xs text-muted-foreground">{member.role}</p>
-                  </Card>
-                </motion.div>
-              ))}
+                    </Card>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
 
@@ -576,34 +583,41 @@ export default function AboutPage() {
           <div>
             <h3 className="text-lg font-semibold text-center mb-6">The Content & Quality Engine</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
-              {contentTeam.map((member, i) => (
-                <motion.div
-                  key={member.name}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  viewport={{ once: true }}
-                  className="group"
-                >
-                  <Card className="text-center p-4 hover:border-primary/30 transition-colors">
-                    <div className="relative inline-block">
-                      <Avatar className="h-14 w-14 mx-auto mb-2">
-                        <AvatarFallback className="bg-primary/10 text-xs">
-                          {member.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <Badge
-                        variant="outline"
-                        className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
+              {contentTeam.map((member, i) => {
+                const getBadgeStyle = (badge: string) => {
+                  switch (badge) {
+                    case 'Quality': return 'bg-gradient-to-r from-purple-500 to-violet-500 text-white border-0';
+                    case 'Content': return 'bg-gradient-to-r from-pink-500 to-rose-500 text-white border-0';
+                    case 'Development': return 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-0';
+                    default: return 'bg-gradient-to-r from-primary to-purple-500 text-white border-0';
+                  }
+                };
+                return (
+                  <motion.div
+                    key={member.name}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    viewport={{ once: true }}
+                    className="group"
+                  >
+                    <Card className="text-center p-4 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                      <div className="relative inline-block">
+                        <Avatar className="h-14 w-14 mx-auto mb-2 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all">
+                          <AvatarFallback className="bg-gradient-to-br from-primary/20 to-purple-500/20 text-xs font-semibold">
+                            {member.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                      </div>
+                      <h4 className="font-semibold text-sm">{member.name}</h4>
+                      <p className="text-xs text-muted-foreground mb-2">{member.role}</p>
+                      <Badge className={cn("text-[10px] px-2.5 py-0.5 font-medium shadow-sm", getBadgeStyle(member.badge))}>
                         {member.badge}
                       </Badge>
-                    </div>
-                    <h4 className="font-medium text-sm">{member.name}</h4>
-                    <p className="text-xs text-muted-foreground">{member.role}</p>
-                  </Card>
-                </motion.div>
-              ))}
+                    </Card>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         </div>

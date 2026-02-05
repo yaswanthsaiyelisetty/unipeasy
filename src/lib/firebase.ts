@@ -1,6 +1,6 @@
 
 import { initializeApp, getApp, getApps } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, browserLocalPersistence, setPersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
@@ -16,6 +16,15 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
+
+// Set persistence to LOCAL - keeps user logged in across browser sessions
+// This uses IndexedDB/localStorage to persist the auth state
+if (typeof window !== 'undefined') {
+  setPersistence(auth, browserLocalPersistence).catch((error) => {
+    console.error('Error setting auth persistence:', error);
+  });
+}
+
 const db = getFirestore(app);
 const storage = getStorage(app);
 const googleProvider = new GoogleAuthProvider();

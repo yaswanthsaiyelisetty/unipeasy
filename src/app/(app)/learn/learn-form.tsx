@@ -161,19 +161,41 @@ export function LearnForm() {
     }
   }
 
-  const handleSave = (type: 'Explanation' | 'Analogy' | 'Mind Map', content: string) => {
+  const [isSaving, setIsSaving] = useState<string | null>(null);
+
+  const handleSave = async (type: 'Explanation' | 'Analogy' | 'Mind Map', content: string) => {
     if (!result) return;
-    addMemoryItem({
-      id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      title: `${result.simpleExplanation.substring(0, 20)}... - ${type}`,
-      content,
-      type,
-      topic: form.getValues('topic')
-    });
-    toast({
-      title: "Saved to Memory Palace!",
-      description: `Your ${type.toLowerCase()} for "${form.getValues('topic')}" has been saved.`
-    })
+    if (!user?.uid) {
+      toast({
+        variant: "destructive",
+        title: "Login Required",
+        description: "Please log in to save items to your Memory Palace."
+      });
+      return;
+    }
+
+    try {
+      setIsSaving(type);
+      await addMemoryItem({
+        id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        title: `${result.simpleExplanation.substring(0, 20)}... - ${type}`,
+        content,
+        type,
+        topic: form.getValues('topic')
+      });
+      toast({
+        title: "Saved to Memory Palace!",
+        description: `Your ${type.toLowerCase()} for "${form.getValues('topic')}" has been saved permanently.`
+      });
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Failed to Save",
+        description: "Could not save to Memory Palace. Please try again."
+      });
+    } finally {
+      setIsSaving(null);
+    }
   }
 
   return (
@@ -183,19 +205,20 @@ export function LearnForm() {
 
       {/* Personalization Prompt */}
       {!hasSetPreferences && (
-        <Card className="border-dashed border-2 border-primary/30 bg-primary/5">
-          <CardContent className="p-4 sm:p-6">
+        <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/5 via-purple-500/5 to-pink-500/5 shadow-lg shadow-primary/5 overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/20 to-purple-500/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+          <CardContent className="p-4 sm:p-6 relative">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <div className="p-3 rounded-lg bg-primary/10">
-                <Sparkles className="h-6 w-6 text-primary" />
+              <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-purple-500 shadow-lg shadow-primary/30">
+                <Sparkles className="h-6 w-6 text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold">Personalize Your Learning Experience</h3>
+                <h3 className="font-bold text-lg bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">Personalize Your Learning</h3>
                 <p className="text-sm text-muted-foreground mt-1">
                   Tell us about your interests and learning style to get tailored explanations.
                 </p>
               </div>
-              <Button onClick={() => setShowInterestsDialog(true)} className="shrink-0">
+              <Button onClick={() => setShowInterestsDialog(true)} className="shrink-0 bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90 shadow-lg shadow-primary/20">
                 <Settings2 className="h-4 w-4 mr-2" />
                 Set Preferences
               </Button>
@@ -205,8 +228,9 @@ export function LearnForm() {
       )}
 
       {/* Search Input */}
-      <Card className="border shadow-sm">
-        <CardContent className="p-6">
+      <Card className="border shadow-lg shadow-primary/5 overflow-hidden relative bg-gradient-to-br from-background via-background to-primary/5">
+        <div className="absolute top-0 left-0 w-48 h-48 bg-gradient-to-br from-primary/10 to-purple-500/10 rounded-full blur-3xl -translate-y-1/2 -translate-x-1/2" />
+        <CardContent className="p-6 relative">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -215,8 +239,10 @@ export function LearnForm() {
                 render={({ field }) => (
                   <FormItem>
                     <div className="flex items-center justify-between">
-                      <FormLabel className="text-base font-medium flex items-center gap-2">
-                        <Search className="h-4 w-4 text-muted-foreground" />
+                      <FormLabel className="text-base font-semibold flex items-center gap-2">
+                        <div className="p-1.5 rounded-lg bg-gradient-to-br from-primary to-purple-500 shadow-md">
+                          <Search className="h-4 w-4 text-white" />
+                        </div>
                         What do you want to learn?
                       </FormLabel>
                       {hasSetPreferences && (
@@ -236,11 +262,10 @@ export function LearnForm() {
                       <div className="relative">
                         <Input
                           placeholder="e.g., Quantum Entanglement, The Krebs Cycle..."
-                          className="h-12 text-base pr-10"
+                          className="h-14 text-base pr-10 border-2 focus:border-primary/50 transition-all shadow-sm focus:shadow-lg focus:shadow-primary/10"
                           {...field}
                           onChange={(e) => {
                             field.onChange(e);
-                            // Clear previous results when user starts typing new topic
                             if (result && e.target.value !== form.getValues('topic')) {
                               setResult(null);
                               setError(null);
@@ -270,10 +295,10 @@ export function LearnForm() {
 
               {/* Search History Dropdown */}
               {showHistory && searchHistory.length > 0 && (
-                <div className="border rounded-lg p-3 bg-muted/30 space-y-2">
+                <div className="border rounded-xl p-3 bg-muted/30 space-y-2 shadow-inner">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium flex items-center gap-2">
-                      <History className="h-4 w-4" />
+                    <span className="text-sm font-semibold flex items-center gap-2">
+                      <History className="h-4 w-4 text-primary" />
                       Recent Searches
                     </span>
                     <Button
@@ -281,7 +306,7 @@ export function LearnForm() {
                       variant="ghost"
                       size="sm"
                       onClick={clearSearchHistory}
-                      className="text-xs h-7"
+                      className="text-xs h-7 text-muted-foreground hover:text-destructive"
                     >
                       Clear All
                     </Button>
@@ -290,8 +315,7 @@ export function LearnForm() {
                     {searchHistory.map((item) => (
                       <Badge
                         key={item.timestamp}
-                        variant="secondary"
-                        className="cursor-pointer hover:bg-secondary/80 pr-1 flex items-center gap-1"
+                        className="cursor-pointer bg-gradient-to-r from-primary/10 to-purple-500/10 text-foreground hover:from-primary/20 hover:to-purple-500/20 border border-primary/20 pr-1 flex items-center gap-1 transition-all hover:shadow-md"
                       >
                         <span
                           onClick={() => {
@@ -319,14 +343,17 @@ export function LearnForm() {
                 </div>
               )}
 
-              <Button type="submit" disabled={loading} className="w-full h-11">
+              <Button type="submit" disabled={loading} className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary via-purple-500 to-pink-500 hover:from-primary/90 hover:via-purple-500/90 hover:to-pink-500/90 shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:-translate-y-0.5">
                 {loading ? (
                   <>
                     <Loader2 className="h-5 w-5 animate-spin mr-2" />
                     Generating...
                   </>
                 ) : (
-                  "Generate Explanation"
+                  <>
+                    <Sparkles className="h-5 w-5 mr-2" />
+                    Generate Explanation
+                  </>
                 )}
               </Button>
             </form>
@@ -379,95 +406,107 @@ export function LearnForm() {
           </Card>
 
           {/* Explanation */}
-          <Card className="border shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0">
+          <Card className="border shadow-lg shadow-blue-500/5 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0 bg-gradient-to-r from-blue-500/5 to-cyan-500/5">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-secondary">
-                  <BookText className="w-5 h-5" />
+                <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg shadow-blue-500/30">
+                  <BookText className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">Simple Explanation</CardTitle>
+                  <CardTitle className="text-lg font-bold">Simple Explanation</CardTitle>
                   <CardDescription>Broken down for easy understanding</CardDescription>
                 </div>
               </div>
               <TextToSpeechButton text={result.simpleExplanation} />
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-5">
               <div className="prose prose-neutral dark:prose-invert max-w-none prose-headings:text-primary prose-headings:font-semibold prose-h2:text-lg prose-h2:mt-4 prose-h2:mb-2 prose-ul:my-2 prose-li:my-0.5 prose-p:my-2 prose-p:leading-relaxed">
                 <ReactMarkdown>{result.simpleExplanation}</ReactMarkdown>
               </div>
             </CardContent>
-            <CardFooter className="border-t bg-muted/30 pt-4">
-              <Button variant="outline" size="sm" onClick={() => handleSave('Explanation', result.simpleExplanation)}>
-                <Save className="mr-2 h-4 w-4" />
-                Save to Memory Palace
+            <CardFooter className="border-t bg-gradient-to-r from-blue-500/5 to-cyan-500/5 pt-4">
+              <Button variant="outline" size="sm" onClick={() => handleSave('Explanation', result.simpleExplanation)} disabled={isSaving !== null} className="hover:bg-blue-500/10 hover:border-blue-500/30">
+                {isSaving === 'Explanation' ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="mr-2 h-4 w-4" />
+                )}
+                {isSaving === 'Explanation' ? 'Saving...' : 'Save to Memory Palace'}
               </Button>
             </CardFooter>
           </Card>
 
           {/* Analogy */}
-          <Card className="border shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0">
+          <Card className="border shadow-lg shadow-amber-500/5 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0 bg-gradient-to-r from-amber-500/5 to-orange-500/5">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-secondary">
-                  <Compass className="w-5 h-5" />
+                <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg shadow-amber-500/30">
+                  <Compass className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">Real-life Analogy</CardTitle>
+                  <CardTitle className="text-lg font-bold">Real-life Analogy</CardTitle>
                   <CardDescription>Connecting to familiar concepts</CardDescription>
                 </div>
               </div>
               <TextToSpeechButton text={result.analogy} />
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-5">
               <div className="prose prose-neutral dark:prose-invert max-w-none prose-p:my-2 prose-p:leading-relaxed prose-strong:text-primary prose-ul:my-2 prose-li:my-0.5">
                 <ReactMarkdown>{result.analogy}</ReactMarkdown>
               </div>
             </CardContent>
-            <CardFooter className="border-t bg-muted/30 pt-4">
-              <Button variant="outline" size="sm" onClick={() => handleSave('Analogy', result.analogy)}>
-                <Save className="mr-2 h-4 w-4" />
-                Save to Memory Palace
+            <CardFooter className="border-t bg-gradient-to-r from-amber-500/5 to-orange-500/5 pt-4">
+              <Button variant="outline" size="sm" onClick={() => handleSave('Analogy', result.analogy)} disabled={isSaving !== null} className="hover:bg-amber-500/10 hover:border-amber-500/30">
+                {isSaving === 'Analogy' ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="mr-2 h-4 w-4" />
+                )}
+                {isSaving === 'Analogy' ? 'Saving...' : 'Save to Memory Palace'}
               </Button>
             </CardFooter>
           </Card>
 
           {/* Mind Map */}
-          <Card className="border shadow-sm">
-            <CardHeader className="flex flex-row items-center gap-3 space-y-0">
-              <div className="p-2 rounded-lg bg-secondary">
-                <Waypoints className="w-5 h-5" />
+          <Card className="border shadow-lg shadow-purple-500/5 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 overflow-hidden">
+            <CardHeader className="flex flex-row items-center gap-3 space-y-0 bg-gradient-to-r from-purple-500/5 to-pink-500/5">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 shadow-lg shadow-purple-500/30">
+                <Waypoints className="w-5 h-5 text-white" />
               </div>
               <div>
-                <CardTitle className="text-lg">Mind Map</CardTitle>
+                <CardTitle className="text-lg font-bold">Mind Map</CardTitle>
                 <CardDescription>Visual hierarchy of key concepts</CardDescription>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="prose prose-neutral dark:prose-invert max-w-none font-mono text-sm bg-muted/50 p-4 rounded-lg">
+            <CardContent className="pt-5">
+              <div className="prose prose-neutral dark:prose-invert max-w-none font-mono text-sm bg-gradient-to-br from-purple-500/5 to-pink-500/5 p-4 rounded-xl border border-purple-500/10">
                 <ReactMarkdown>{result.mindMap}</ReactMarkdown>
               </div>
             </CardContent>
-            <CardFooter className="border-t bg-muted/30 pt-4">
-              <Button variant="outline" size="sm" onClick={() => handleSave('Mind Map', result.mindMap)}>
-                <Save className="mr-2 h-4 w-4" />
-                Save to Memory Palace
+            <CardFooter className="border-t bg-gradient-to-r from-purple-500/5 to-pink-500/5 pt-4">
+              <Button variant="outline" size="sm" onClick={() => handleSave('Mind Map', result.mindMap)} disabled={isSaving !== null} className="hover:bg-purple-500/10 hover:border-purple-500/30">
+                {isSaving === 'Mind Map' ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="mr-2 h-4 w-4" />
+                )}
+                {isSaving === 'Mind Map' ? 'Saving...' : 'Save to Memory Palace'}
               </Button>
             </CardFooter>
           </Card>
 
           {/* Quiz */}
-          <Card className="border shadow-sm">
-            <CardHeader className="flex flex-row items-center gap-3 space-y-0">
-              <div className="p-2 rounded-lg bg-secondary">
-                <HelpCircle className="w-5 h-5" />
+          <Card className="border shadow-lg shadow-emerald-500/5 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 overflow-hidden">
+            <CardHeader className="flex flex-row items-center gap-3 space-y-0 bg-gradient-to-r from-emerald-500/5 to-green-500/5">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-green-500 shadow-lg shadow-emerald-500/30">
+                <HelpCircle className="w-5 h-5 text-white" />
               </div>
               <div>
-                <CardTitle className="text-lg">Knowledge Check</CardTitle>
+                <CardTitle className="text-lg font-bold">Knowledge Check</CardTitle>
                 <CardDescription>Test your understanding</CardDescription>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-5">
               <Quiz questions={result.quiz} onQuizFail={handleQuizFail} />
             </CardContent>
           </Card>

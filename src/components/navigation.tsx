@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   Award,
   BrainCircuit,
+  Briefcase,
   LayoutGrid,
   Lightbulb,
   Rocket,
@@ -62,6 +63,11 @@ const navItems = [
     label: "Skills",
   },
   {
+    href: "/internships",
+    icon: Briefcase,
+    label: "Internships",
+  },
+  {
     href: "/memory-palace",
     icon: BrainCircuit,
     label: "Memory Palace",
@@ -72,12 +78,12 @@ const navItems = [
     label: "My Profile",
   },
 ];
-  // Add About page nav item
-  navItems.push({
-    href: "/about",
-    icon: Rocket,
-    label: "About",
-  });
+// Add About page nav item
+navItems.push({
+  href: "/about",
+  icon: Rocket,
+  label: "About",
+});
 
 export function Navigation() {
   const pathname = usePathname();
@@ -97,7 +103,7 @@ export function Navigation() {
   useEffect(() => {
     setNavigatingTo(null);
   }, [pathname]);
-  
+
   const handleSignOut = async () => {
     await signOut(auth);
     router.push('/login');
@@ -105,14 +111,14 @@ export function Navigation() {
 
   const handleNavigation = (href: string) => {
     if (pathname === href) return;
-    
+
     setNavigatingTo(href);
-    
+
     // Close mobile sidebar
     if (isMobile) {
       setOpenMobile(false);
     }
-    
+
     startTransition(() => {
       router.push(href);
     });
@@ -124,23 +130,25 @@ export function Navigation() {
 
   return (
     <div className="flex flex-col h-full">
-      <SidebarHeader>
-        <div className="flex items-center justify-between p-2">
-          <div className="flex items-center gap-2">
-            <Rocket className="w-8 h-8 text-primary" />
-            <span className="text-xl font-headline font-semibold">
+      <SidebarHeader className="p-4 border-b border-primary/10">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-primary to-purple-500 shadow-lg shadow-primary/30">
+              <Rocket className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-xl font-headline font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
               UniPeasy
             </span>
           </div>
           <ThemeToggle />
         </div>
       </SidebarHeader>
-      <SidebarContent>
-        <SidebarMenu>
+      <SidebarContent className="px-3 py-4">
+        <SidebarMenu className="space-y-1">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             const isNavigating = navigatingTo === item.href;
-            
+
             return (
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
@@ -148,17 +156,31 @@ export function Navigation() {
                   tooltip={isMobile ? undefined : item.label}
                   onClick={() => handleNavigation(item.href)}
                   className={cn(
-                    "cursor-pointer transition-all duration-300",
-                    isNavigating && "animate-pulse"
+                    "cursor-pointer transition-all duration-300 rounded-xl h-11",
+                    isNavigating && "animate-pulse",
+                    isActive
+                      ? "bg-gradient-to-r from-primary/15 to-purple-500/15 border border-primary/20 shadow-sm text-primary font-semibold"
+                      : "hover:bg-gradient-to-r hover:from-primary/10 hover:to-purple-500/10 hover:border-primary/10"
                   )}
                 >
-                  <item.icon className={cn(
-                    "transition-transform duration-300",
-                    isNavigating && "scale-110"
-                  )} />
-                  <span>{item.label}</span>
+                  <div className={cn(
+                    "p-1.5 rounded-lg transition-all",
+                    isActive
+                      ? "bg-gradient-to-br from-primary to-purple-500 shadow-md shadow-primary/20"
+                      : "bg-muted group-hover:bg-gradient-to-br group-hover:from-primary/20 group-hover:to-purple-500/20"
+                  )}>
+                    <item.icon className={cn(
+                      "w-4 h-4 transition-all duration-300",
+                      isActive ? "text-white" : "text-muted-foreground group-hover:text-primary",
+                      isNavigating && "scale-110"
+                    )} />
+                  </div>
+                  <span className={cn(
+                    "transition-colors",
+                    isActive ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
+                  )}>{item.label}</span>
                   {isNavigating && (
-                    <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                    <span className="ml-auto w-2 h-2 rounded-full bg-primary animate-pulse" />
                   )}
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -166,24 +188,24 @@ export function Navigation() {
           })}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarSeparator />
-      <SidebarFooter>
-        <div className="flex items-center justify-between p-2">
+      <SidebarSeparator className="bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+      <SidebarFooter className="p-3">
+        <div className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-br from-primary/10 via-purple-500/10 to-pink-500/10 border border-primary/20 shadow-lg shadow-primary/5 hover:shadow-xl hover:border-primary/30 transition-all duration-300">
           <div className="flex items-center gap-3">
-              <Avatar>
-                <AvatarImage src={user?.photoURL || `https://picsum.photos/seed/${user?.uid}/40/40`} />
-                <AvatarFallback>
-                  <User />
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col">
-                <span className="font-semibold text-sm">{user?.displayName || "User"}</span>
-                <span className="text-xs text-muted-foreground">
-                  {user?.email}
-                </span>
-              </div>
+            <Avatar className="ring-2 ring-primary/50 ring-offset-2 ring-offset-background shadow-lg shadow-primary/20">
+              <AvatarImage src={user?.photoURL || `https://picsum.photos/seed/${user?.uid}/40/40`} />
+              <AvatarFallback className="bg-gradient-to-br from-primary to-purple-500 text-white font-semibold">
+                {user?.displayName?.split(' ').map(n => n[0]).join('').slice(0, 2) || <User className="w-4 h-4" />}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col min-w-0">
+              <span className="font-bold text-sm bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent truncate">{user?.displayName || "User"}</span>
+              <span className="text-[11px] text-muted-foreground truncate max-w-[140px]">
+                {user?.email}
+              </span>
+            </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={handleSignOut} className="h-8 w-8">
+          <Button variant="ghost" size="icon" onClick={handleSignOut} className="h-9 w-9 rounded-lg hover:bg-destructive/10 hover:text-destructive transition-all">
             <LogOut className="w-4 h-4" />
           </Button>
         </div>
