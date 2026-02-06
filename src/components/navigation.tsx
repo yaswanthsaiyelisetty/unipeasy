@@ -190,22 +190,22 @@ export function Navigation() {
       </SidebarContent>
       <SidebarSeparator className="bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
       <SidebarFooter className="p-3">
-        <div className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-br from-primary/10 via-purple-500/10 to-pink-500/10 border border-primary/20 shadow-lg shadow-primary/5 hover:shadow-xl hover:border-primary/30 transition-all duration-300">
-          <div className="flex items-center gap-3">
-            <Avatar className="ring-2 ring-primary/50 ring-offset-2 ring-offset-background shadow-lg shadow-primary/20">
+        <div className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-br from-primary/10 via-purple-500/10 to-pink-500/10 border border-primary/20 shadow-lg shadow-primary/5 hover:shadow-xl hover:border-primary/30 transition-all duration-300 overflow-hidden">
+          <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
+            <Avatar className="ring-2 ring-primary/50 ring-offset-2 ring-offset-background shadow-lg shadow-primary/20 flex-shrink-0">
               <AvatarImage src={user?.photoURL || `https://picsum.photos/seed/${user?.uid}/40/40`} />
               <AvatarFallback className="bg-gradient-to-br from-primary to-purple-500 text-white font-semibold">
                 {user?.displayName?.split(' ').map(n => n[0]).join('').slice(0, 2) || <User className="w-4 h-4" />}
               </AvatarFallback>
             </Avatar>
-            <div className="flex flex-col min-w-0">
-              <span className="font-bold text-sm bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent truncate">{user?.displayName || "User"}</span>
-              <span className="text-[11px] text-muted-foreground truncate max-w-[140px]">
+            <div className="flex flex-col min-w-0 overflow-hidden flex-1">
+              <span className="font-bold text-sm bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent truncate block">{user?.displayName || "User"}</span>
+              <span className="text-[11px] text-muted-foreground truncate block">
                 {user?.email}
               </span>
             </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={handleSignOut} className="h-9 w-9 rounded-lg hover:bg-destructive/10 hover:text-destructive transition-all">
+          <Button variant="ghost" size="icon" onClick={handleSignOut} className="h-9 w-9 rounded-lg hover:bg-destructive/10 hover:text-destructive transition-all flex-shrink-0">
             <LogOut className="w-4 h-4" />
           </Button>
         </div>

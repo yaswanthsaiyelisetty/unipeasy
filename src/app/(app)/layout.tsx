@@ -2,7 +2,7 @@
 "use client";
 
 import { useAuth } from "@/context/auth-context";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect, Suspense } from "react";
 import { Navigation } from "@/components/navigation";
 import {
@@ -28,6 +28,8 @@ import { cn } from "@/lib/utils";
 
 function AppContent({ children }: { children: React.ReactNode }) {
   const { isFocusMode } = useFocusMode();
+  const pathname = usePathname();
+  const isDashboard = pathname === "/dashboard";
 
   return (
     <div className="min-h-screen w-full">
@@ -59,14 +61,14 @@ function AppContent({ children }: { children: React.ReactNode }) {
             </div>
             <FocusModeToggle variant="minimal" />
           </header>
-          
+
           {/* Focus Mode Exit Button */}
           {isFocusMode && (
             <div className="fixed top-4 right-4 z-50">
               <FocusModeToggle variant="default" />
             </div>
           )}
-          
+
           <main className={cn(
             "p-4 sm:p-6 lg:p-8 transition-all duration-300",
             isFocusMode && "max-w-4xl mx-auto"
@@ -75,12 +77,12 @@ function AppContent({ children }: { children: React.ReactNode }) {
           </main>
         </SidebarInset>
       </SidebarProvider>
-      
+
       {/* Floating Components */}
       {!isFocusMode && (
         <>
           <GlobalAIChat />
-          <FeatureRequestButton />
+          {isDashboard && <FeatureRequestButton />}
         </>
       )}
     </div>

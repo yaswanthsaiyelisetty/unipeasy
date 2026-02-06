@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lock, Shield, LogOut, BookOpen, BarChart3, Users, Menu, X, MessageSquare, Briefcase, Lightbulb } from "lucide-react";
+import { Lock, Shield, LogOut, BookOpen, BarChart3, Users, Menu, X, MessageSquare, Briefcase, Lightbulb, Gift } from "lucide-react";
 import Link from "next/link";
 import {
   Sheet,
@@ -39,6 +39,7 @@ export default function AdminLayout({
     { href: "/admin/feedback", label: "Feedback", icon: MessageSquare },
     { href: "/admin/internships", label: "Internships", icon: Briefcase },
     { href: "/admin/suggestions", label: "Suggestions", icon: Lightbulb },
+    { href: "/admin/contributions", label: "Contributions", icon: Gift },
   ];
 
   useEffect(() => {

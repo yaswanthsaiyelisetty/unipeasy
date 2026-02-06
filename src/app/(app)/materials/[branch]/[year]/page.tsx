@@ -14,8 +14,10 @@ import {
   formatBranchName,
   formatYearName,
 } from "@/lib/materials-data";
-import { BookOpen, Loader2, AlertCircle } from "lucide-react";
+import { BookOpen, Loader2, AlertCircle, Gift } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Card, CardContent } from "@/components/ui/card";
+import { ContributeDialog } from "@/components/materials/contribute-dialog";
 
 export default function YearPage() {
   const params = useParams();
@@ -92,6 +94,28 @@ export default function YearPage() {
         title={`${branch.shortName} - ${year.name}`}
         description={`Browse study materials for ${branch.name}, ${year.name}. All notes are topper-verified.`}
       />
+
+      {/* Contribution Banner */}
+      <Card className="mt-6 border-emerald-500/30 bg-gradient-to-r from-emerald-500/5 to-cyan-500/5">
+        <CardContent className="py-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 shrink-0">
+              <Gift className="h-5 w-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-foreground text-sm sm:text-base">
+                Become a Contributor
+              </h3>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                Have quality study materials? Share them with the community and get rewarded for your contribution.
+              </p>
+            </div>
+            <div className="shrink-0">
+              <ContributeDialog branch={branchId} year={yearId} />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="mt-8">
         {loading ? (

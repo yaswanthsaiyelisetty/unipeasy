@@ -97,10 +97,17 @@ export default function InternshipsPage() {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.2 }}
+                    className="flex flex-col-reverse sm:flex-row items-start sm:items-center gap-3"
                 >
+                    <div className="px-3 py-2 rounded-lg bg-gradient-to-r from-amber-500/15 to-orange-500/15 border border-amber-500/30">
+                        <p className="text-xs sm:text-sm text-amber-700 dark:text-amber-400 font-medium flex items-center gap-2">
+                            <span className="text-base">🤝</span>
+                            <span>Help your fellow students discover great opportunities!<br className="hidden sm:block" /> Your suggestion could be someone&apos;s big break.</span>
+                        </p>
+                    </div>
                     <Button
                         onClick={() => setSuggestModalOpen(true)}
-                        className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/25 gap-2 group"
+                        className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/25 gap-2 group shrink-0"
                     >
                         <Lightbulb className="h-4 w-4 group-hover:rotate-12 transition-transform" />
                         Suggest an Internship

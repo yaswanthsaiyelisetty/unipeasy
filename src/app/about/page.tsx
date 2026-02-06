@@ -11,6 +11,7 @@ import {
   FolderOpen,
   Lightbulb,
   ArrowRight,
+  ArrowLeft,
   CheckCircle2,
   Users,
   BookOpen,
@@ -30,6 +31,11 @@ import {
   Heart,
   Lock,
   UserCheck,
+  Megaphone,
+  Search,
+  Palette,
+  FileCheck,
+  PenTool,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -47,31 +53,31 @@ const founder = {
 };
 
 const coFounders = [
-  { 
-    name: "T.G.S. Sri Ram", 
-    role: "Co-Founder", 
+  {
+    name: "T.G.S. Sri Ram",
+    role: "Co-Founder",
     description: "Team Manager & Backend Developer. Architecting robust systems that power seamless learning experiences.",
     image: "/team/sriram.jpg",
   },
-  { 
-    name: "Vaishnavi", 
-    role: "Co-Founder", 
+  {
+    name: "Vaishnavi",
+    role: "Co-Founder",
     description: "Contributor Lead & Onboarding Specialist. Building bridges between students and opportunities.",
     image: "/team/vaishnavi.jpg",
   },
 ];
 
 const coreTeam = [
-  { name: "Syamala", role: "Marketing Lead", badge: "Outreach" },
-  { name: "Jahnavi", role: "Reference Specialist", badge: "Research" },
-  { name: "Ruthvik", role: "Frontend Developer", badge: "Development" },
+  { name: "Syamala", role: "Marketing Lead", badge: "Outreach", icon: Megaphone, gradient: "from-orange-500 to-amber-500", bgGradient: "from-orange-500/10 to-amber-500/10" },
+  { name: "Jahnavi", role: "Reference Specialist", badge: "Research", icon: Search, gradient: "from-blue-500 to-cyan-500", bgGradient: "from-blue-500/10 to-cyan-500/10" },
+  { name: "Ruthvik", role: "Frontend Developer", badge: "Development", icon: Code2, gradient: "from-purple-500 to-pink-500", bgGradient: "from-purple-500/10 to-pink-500/10" },
 ];
 
 const contentTeam = [
-  { name: "Varun", role: "Content Verifier", badge: "Quality" },
-  { name: "Sravya", role: "Material Creator", badge: "Content" },
-  { name: "Vasanthi", role: "Material Creator", badge: "Content" },
-  { name: "Raju", role: "Frontend Developer", badge: "Development" },
+  { name: "Varun", role: "Content Verifier", badge: "Quality", icon: FileCheck, gradient: "from-emerald-500 to-green-500", bgGradient: "from-emerald-500/10 to-green-500/10" },
+  { name: "Sravya", role: "Material Creator", badge: "Content", icon: PenTool, gradient: "from-violet-500 to-purple-500", bgGradient: "from-violet-500/10 to-purple-500/10" },
+  { name: "Vasanthi", role: "Material Creator", badge: "Content", icon: Palette, gradient: "from-pink-500 to-rose-500", bgGradient: "from-pink-500/10 to-rose-500/10" },
+  { name: "Raju", role: "Frontend Developer", badge: "Development", icon: Code2, gradient: "from-indigo-500 to-blue-500", bgGradient: "from-indigo-500/10 to-blue-500/10" },
 ];
 
 // Features
@@ -134,7 +140,7 @@ function useTypewriter(text: string, speed: number = 50) {
     let i = 0;
     setDisplayText("");
     setIsComplete(false);
-    
+
     const timer = setInterval(() => {
       if (i < text.length) {
         setDisplayText(text.slice(0, i + 1));
@@ -176,7 +182,7 @@ function ConnectSection() {
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -195,7 +201,7 @@ function ConnectSection() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         <div className="absolute inset-0 bg-muted group-hover:bg-transparent transition-colors duration-300" />
         <div className="absolute inset-[2px] bg-background/95 rounded-[10px] group-hover:bg-background/10 transition-colors duration-300" />
-        
+
         <div className="relative flex items-center gap-3">
           <Instagram className="h-5 w-5 text-muted-foreground group-hover:text-white transition-colors duration-300" />
           <span className="font-medium text-muted-foreground group-hover:text-white transition-colors duration-300">
@@ -216,7 +222,7 @@ function ConnectSection() {
         <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         <div className="absolute inset-0 bg-muted group-hover:bg-transparent transition-colors duration-300" />
         <div className="absolute inset-[2px] bg-background/95 rounded-[10px] group-hover:bg-primary/5 transition-colors duration-300" />
-        
+
         <div className="relative flex items-center gap-3">
           {emailCopied ? (
             <>
@@ -254,51 +260,68 @@ export default function AboutPage() {
       <section className="relative overflow-hidden py-20 sm:py-32">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-purple-500/5 to-pink-500/5" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
-        
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 text-center">
+
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
+          {/* Back Button */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mb-8"
           >
-            <Badge variant="secondary" className="mb-6 gap-1.5">
-              <Sparkles className="h-3.5 w-3.5" />
-              AI-Powered Learning Platform
-            </Badge>
-          </motion.div>
-
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6">
-            <span className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent">
-              {displayText}
-            </span>
-            {!isComplete && <span className="animate-pulse">|</span>}
-          </h1>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 2, duration: 0.5 }}
-            className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto mb-8"
-          >
-            One centralized platform for the modern student. Verified materials, 
-            AI-powered strategies, and industry-level skill tracks—all in one place.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 2.5, duration: 0.5 }}
-            className="flex flex-wrap justify-center gap-4"
-          >
-            <Button asChild size="lg" className="gap-2">
-              <Link href="/login">
-                Get Started <ArrowRight className="h-4 w-4" />
+            <Button asChild variant="ghost" size="sm" className="gap-2 hover:bg-primary/10">
+              <Link href="/">
+                <ArrowLeft className="h-4 w-4" />
+                Back to Home
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link href="/dashboard">Explore Dashboard</Link>
-            </Button>
           </motion.div>
+
+          <div className="text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Badge variant="secondary" className="mb-6 gap-1.5">
+                <Sparkles className="h-3.5 w-3.5" />
+                AI-Powered Learning Platform
+              </Badge>
+            </motion.div>
+
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6">
+              <span className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                {displayText}
+              </span>
+              {!isComplete && <span className="animate-pulse">|</span>}
+            </h1>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 2, duration: 0.5 }}
+              className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto mb-8"
+            >
+              One centralized platform for the modern student. Verified materials,
+              AI-powered strategies, and industry-level skill tracks—all in one place.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 2.5, duration: 0.5 }}
+              className="flex flex-wrap justify-center gap-4"
+            >
+              <Button asChild size="lg" className="gap-2">
+                <Link href="/login">
+                  Get Started <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link href="/dashboard">Explore Dashboard</Link>
+              </Button>
+            </motion.div>
+          </div>
         </div>
       </section>
 
@@ -307,7 +330,7 @@ export default function AboutPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <Quote className="h-10 w-10 text-primary/40 mx-auto mb-6" />
           <blockquote className="text-xl sm:text-2xl font-medium italic text-foreground/80">
-            &quot;Unipeasy is not just about notes; it is about empowering students with 
+            &quot;Unipeasy is not just about notes; it is about empowering students with
             clarity, confidence, and convenience in their academic journey.&quot;
           </blockquote>
         </div>
@@ -464,7 +487,7 @@ export default function AboutPage() {
               Protecting Students First
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Solving the trust issue that plagues most student platforms today. 
+              Solving the trust issue that plagues most student platforms today.
               Your safety and data privacy are our top priorities.
             </p>
           </div>
@@ -530,7 +553,7 @@ export default function AboutPage() {
                     <h3 className="text-xl font-bold">Why This Matters</h3>
                   </div>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Too many student platforms exploit trust. Fake internships, data harvesting, 
+                    Too many student platforms exploit trust. Fake internships, data harvesting,
                     and misleading opportunities have become common. We&apos;re different.
                   </p>
                   <div className="space-y-4">
@@ -540,7 +563,7 @@ export default function AboutPage() {
                         <span className="font-medium text-sm">Suggest an Internship</span>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Found a great opportunity? Share it with fellow students! Our team verifies and 
+                        Found a great opportunity? Share it with fellow students! Our team verifies and
                         adds legitimate internships to help everyone succeed.
                       </p>
                     </div>
@@ -550,7 +573,7 @@ export default function AboutPage() {
                         <span className="font-medium text-sm">Your Data, Your Control</span>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        We use industry-standard encryption and never share your information. 
+                        We use industry-standard encryption and never share your information.
                         Your academic journey is private and protected.
                       </p>
                     </div>
@@ -659,32 +682,31 @@ export default function AboutPage() {
           {/* Core Team */}
           <div className="mb-12">
             <h3 className="text-lg font-semibold text-center mb-6">Core Management & Development</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-lg mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
               {coreTeam.map((member, i) => (
                 <motion.div
                   key={member.name}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
+                  transition={{ delay: i * 0.15 }}
                   viewport={{ once: true }}
-                  className="group"
                 >
-                  <Card className="text-center p-4 h-full hover:border-primary/30 transition-all duration-300 hover:shadow-md">
-                    <div className="relative inline-block">
-                      <Avatar className="h-16 w-16 mx-auto mb-3 group-hover:scale-105 transition-transform">
-                        <AvatarFallback className="bg-primary/10 text-sm">
-                          {member.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <Badge 
-                        variant="secondary" 
-                        className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
-                      >
-                        {member.badge}
-                      </Badge>
-                    </div>
-                    <h4 className="font-medium text-sm">{member.name}</h4>
-                    <p className="text-xs text-muted-foreground">{member.role}</p>
+                  <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 to-purple-500/5 hover:border-primary/40 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10">
+                    <CardContent className="p-5 text-center">
+                      <div className="relative inline-block mb-3">
+                        <Avatar className="h-20 w-20 border-4 border-primary/20">
+                          <AvatarFallback className="text-lg bg-primary/10">
+                            {member.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <Badge className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-purple-600">
+                          <member.icon className="h-3 w-3 mr-1" />
+                          {member.badge}
+                        </Badge>
+                      </div>
+                      <h4 className="font-bold mt-3">{member.name}</h4>
+                      <p className="text-sm text-muted-foreground mt-1">{member.role}</p>
+                    </CardContent>
                   </Card>
                 </motion.div>
               ))}
@@ -694,7 +716,7 @@ export default function AboutPage() {
           {/* Content Team */}
           <div>
             <h3 className="text-lg font-semibold text-center mb-6">The Content & Quality Engine</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-4xl mx-auto">
               {contentTeam.map((member, i) => (
                 <motion.div
                   key={member.name}
@@ -702,24 +724,23 @@ export default function AboutPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1 }}
                   viewport={{ once: true }}
-                  className="group"
                 >
-                  <Card className="text-center p-4 hover:border-primary/30 transition-colors">
-                    <div className="relative inline-block">
-                      <Avatar className="h-14 w-14 mx-auto mb-2">
-                        <AvatarFallback className="bg-primary/10 text-xs">
-                          {member.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <Badge 
-                        variant="outline" 
-                        className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        {member.badge}
-                      </Badge>
-                    </div>
-                    <h4 className="font-medium text-sm">{member.name}</h4>
-                    <p className="text-xs text-muted-foreground">{member.role}</p>
+                  <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 to-purple-500/5 hover:border-primary/40 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10">
+                    <CardContent className="p-5 text-center">
+                      <div className="relative inline-block mb-3">
+                        <Avatar className="h-20 w-20 border-4 border-primary/20">
+                          <AvatarFallback className="text-lg bg-primary/10">
+                            {member.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <Badge className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-purple-600">
+                          <member.icon className="h-3 w-3 mr-1" />
+                          {member.badge}
+                        </Badge>
+                      </div>
+                      <h4 className="font-bold mt-3">{member.name}</h4>
+                      <p className="text-sm text-muted-foreground mt-1">{member.role}</p>
+                    </CardContent>
                   </Card>
                 </motion.div>
               ))}
@@ -743,7 +764,7 @@ export default function AboutPage() {
               <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
                 Get instant access to all AI-powered features and verified study materials.
               </p>
-              
+
               <div className="flex items-center justify-center gap-4 mb-8">
                 <span className="text-3xl text-muted-foreground line-through">₹300</span>
                 <span className="text-5xl font-bold text-green-500">₹0</span>
@@ -768,10 +789,10 @@ export default function AboutPage() {
       <section className="py-12 border-t">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <blockquote className="text-lg italic text-muted-foreground mb-8">
-            &quot;Unipeasy is built by students, for students, growing as a national movement 
+            &quot;Unipeasy is built by students, for students, growing as a national movement
             of empowerment and innovation.&quot;
           </blockquote>
-          
+
           {/* Connect Section */}
           <ConnectSection />
         </div>

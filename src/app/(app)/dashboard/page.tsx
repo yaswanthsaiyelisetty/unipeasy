@@ -231,19 +231,37 @@ export default function DashboardPage() {
             {/* Study Streak - Compact Version */}
             <StudyStreak variant="compact" />
             <div className="h-10 w-px bg-border hidden sm:block" />
-            <div className="text-right hidden sm:block">
-              <p className="text-xl font-semibold">
+            <motion.div
+              className="text-right hidden sm:block group cursor-pointer"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <motion.p
+                className="text-xl font-semibold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
                 {progressData.length}
-              </p>
-              <p className="text-xs text-muted-foreground">Active Tracks</p>
-            </div>
+              </motion.p>
+              <p className="text-xs text-muted-foreground group-hover:text-primary transition-colors">Active Tracks</p>
+            </motion.div>
             <div className="h-10 w-px bg-border hidden sm:block" />
-            <div className="text-right hidden sm:block">
-              <p className="text-xl font-semibold">
+            <motion.div
+              className="text-right hidden sm:block group cursor-pointer"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <motion.p
+                className="text-xl font-semibold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
                 {memoryItems.length}
-              </p>
-              <p className="text-xs text-muted-foreground">Saved Items</p>
-            </div>
+              </motion.p>
+              <p className="text-xs text-muted-foreground group-hover:text-primary transition-colors">Saved Items</p>
+            </motion.div>
           </div>
         </div>
       </div>
@@ -256,7 +274,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Continue Learning from Last Access */}
           <ContinueLearning />
-          
+
           {/* Continue Learning Card */}
           {lastVisited && (
             <Card className="border shadow-sm">
@@ -301,7 +319,7 @@ export default function DashboardPage() {
               <Rocket className="w-4 h-4 text-muted-foreground" />
               Quick Access
             </h2>
-            <motion.div 
+            <motion.div
               variants={staggerContainer}
               initial="hidden"
               animate="show"
@@ -311,18 +329,35 @@ export default function DashboardPage() {
                 const cardContent = (
                   <motion.div
                     variants={fadeUpVariant}
-                    whileHover={hoverGlow}
-                    whileTap={tapEffect}
+                    whileHover={{ y: -4, scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
                   >
                     <Card className={cn(
-                      "h-full border shadow-sm transition-all duration-300",
-                      "hover:shadow-lg hover:border-primary/30",
+                      "h-full border-2 shadow-sm transition-all duration-500",
+                      "hover:shadow-xl hover:shadow-primary/10 hover:border-primary/40",
                       "bg-gradient-to-br hover:bg-gradient-to-br",
+                      "relative overflow-hidden",
                       item.gradient
                     )}>
-                      <CardContent className="p-5">
-                        <item.icon className={cn("h-8 w-8 mb-3 transition-transform group-hover:scale-110", item.iconColor)} />
-                        <h3 className="font-medium text-sm mb-1">{item.title}</h3>
+                      {/* Shimmer effect on hover */}
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                      </div>
+                      <CardContent className="p-5 relative">
+                        <div className="relative">
+                          <item.icon className={cn(
+                            "h-8 w-8 mb-3 transition-all duration-300",
+                            "group-hover:scale-125 group-hover:rotate-3",
+                            item.iconColor
+                          )} />
+                          {/* Glow effect behind icon */}
+                          <div className={cn(
+                            "absolute inset-0 blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-500",
+                            item.iconColor
+                          )} />
+                        </div>
+                        <h3 className="font-semibold text-sm mb-1 group-hover:text-primary transition-colors">{item.title}</h3>
                         <p className="text-xs text-muted-foreground">{item.description}</p>
                       </CardContent>
                     </Card>
@@ -356,64 +391,64 @@ export default function DashboardPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-          <Card className="border shadow-sm">
-            <CardHeader className="p-5 pb-0">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded bg-secondary">
-                  <BrainCircuit className="w-4 h-4" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg">Recent Discoveries</CardTitle>
-                  <CardDescription>Your latest saved insights</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="p-5">
-              {isLoaded && recentMemories.length > 0 ? (
-                <div className="space-y-3">
-                  {recentMemories.map((item) => (
-                    <div
-                      key={item.id}
-                      className="group flex items-center gap-4 p-3 rounded-lg bg-muted/50 border hover:shadow-sm transition-shadow"
-                    >
-                      <div className="p-2 rounded bg-secondary">
-                        {getMemoryItemIcon(item.type)}
-                      </div>
-                      <div className="flex-grow min-w-0">
-                        <p className="font-medium text-sm truncate">{item.topic}</p>
-                        <p className="text-xs text-muted-foreground">{item.type}</p>
-                      </div>
-                      <Button variant="ghost" size="sm" asChild className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Link href="/memory-palace">
-                          View <ArrowRight className="ml-1 h-3 w-3" />
-                        </Link>
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-10">
-                  <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-secondary flex items-center justify-center">
-                    <BrainCircuit className="w-7 h-7 text-muted-foreground" />
+            <Card className="border shadow-sm">
+              <CardHeader className="p-5 pb-0">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded bg-secondary">
+                    <BrainCircuit className="w-4 h-4" />
                   </div>
-                  <p className="font-medium">No discoveries yet</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Start learning to save insights
-                  </p>
-                  <Button asChild variant="outline" size="sm" className="mt-4">
-                    <Link href="/learn">
-                      Start Learning <ArrowRight className="ml-2 h-3 w-3" />
-                    </Link>
-                  </Button>
+                  <div>
+                    <CardTitle className="text-lg">Recent Discoveries</CardTitle>
+                    <CardDescription>Your latest saved insights</CardDescription>
+                  </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardHeader>
+              <CardContent className="p-5">
+                {isLoaded && recentMemories.length > 0 ? (
+                  <div className="space-y-3">
+                    {recentMemories.map((item) => (
+                      <div
+                        key={item.id}
+                        className="group flex items-center gap-4 p-3 rounded-lg bg-muted/50 border hover:shadow-sm transition-shadow"
+                      >
+                        <div className="p-2 rounded bg-secondary">
+                          {getMemoryItemIcon(item.type)}
+                        </div>
+                        <div className="flex-grow min-w-0">
+                          <p className="font-medium text-sm truncate">{item.topic}</p>
+                          <p className="text-xs text-muted-foreground">{item.type}</p>
+                        </div>
+                        <Button variant="ghost" size="sm" asChild className="opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Link href="/memory-palace">
+                            View <ArrowRight className="ml-1 h-3 w-3" />
+                          </Link>
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-10">
+                    <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-secondary flex items-center justify-center">
+                      <BrainCircuit className="w-7 h-7 text-muted-foreground" />
+                    </div>
+                    <p className="font-medium">No discoveries yet</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Start learning to save insights
+                    </p>
+                    <Button asChild variant="outline" size="sm" className="mt-4">
+                      <Link href="/learn">
+                        Start Learning <ArrowRight className="ml-2 h-3 w-3" />
+                      </Link>
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </motion.div>
         </div>
 
         {/* Sidebar */}
-        <motion.div 
+        <motion.div
           className="lg:col-span-1 space-y-6"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -504,7 +539,7 @@ export default function DashboardPage() {
         </motion.div>
       </div>
       {/* Social & Contact Section */}
-      <motion.div 
+      <motion.div
         className="mt-12 flex flex-col items-center gap-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -584,7 +619,7 @@ function ConnectButtons() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         <div className="absolute inset-0 bg-muted group-hover:bg-transparent transition-colors duration-300" />
         <div className="absolute inset-[2px] bg-background/95 rounded-[10px] group-hover:bg-background/10 transition-colors duration-300" />
-        
+
         <div className="relative flex items-center gap-2">
           <svg viewBox="0 0 448 512" fill="currentColor" className="w-5 h-5 text-muted-foreground group-hover:text-white transition-colors duration-300">
             <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9 114.9-51.3 114.9-114.9S287.7 141 224.1 141zm0 186c-39.5 0-71.5-32-71.5-71.5s32-71.5 71.5-71.5 71.5 32 71.5 71.5-32 71.5-71.5 71.5zm146.4-194.3c0 14.9-12 26.9-26.9 26.9s-26.9-12-26.9-26.9 12-26.9 26.9-26.9 26.9 12 26.9 26.9zm76.1 27.2c-1.7-35.3-9.9-66.7-36.2-92.1S388.6 1.7 353.3 0C317.5-1.7 130.5-1.7 94.7 0 59.4 1.7 28 9.9 2.7 36.2S1.7 59.4 0 94.7C-1.7 130.5-1.7 317.5 0 353.3c1.7 35.3 9.9 66.7 36.2 92.1s56.8 34.5 92.1 36.2c35.8 1.7 222.8 1.7 258.6 0 35.3-1.7 66.7-9.9 92.1-36.2s34.5-56.8 36.2-92.1c1.7-35.8 1.7-222.8 0-258.6zM398.8 388c-7.8 19.6-22.9 34.7-42.5 42.5-29.4 11.7-99.2 9-132.3 9s-102.9 2.6-132.3-9c-19.6-7.8-34.7-22.9-42.5-42.5-11.7-29.4-9-99.2-9-132.3s-2.6-102.9 9-132.3c7.8-19.6 22.9-34.7 42.5-42.5C123.1 43.2 192.9 45.8 226 45.8s102.9-2.6 132.3 9c19.6 7.8 34.7 22.9 42.5 42.5 11.7 29.4 9 99.2 9 132.3s2.7 102.9-9 132.3z" />
@@ -607,7 +642,7 @@ function ConnectButtons() {
         <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         <div className="absolute inset-0 bg-muted group-hover:bg-transparent transition-colors duration-300" />
         <div className="absolute inset-[2px] bg-background/95 rounded-[10px] group-hover:bg-primary/5 transition-colors duration-300" />
-        
+
         <div className="relative flex items-center gap-2">
           {emailCopied ? (
             <>
