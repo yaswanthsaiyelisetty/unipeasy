@@ -28,6 +28,7 @@ import {
   ChevronRight,
   Gift,
   CheckCircle2,
+  Building,
 } from "lucide-react";
 import {
   Card,
@@ -55,6 +56,7 @@ import { triggerSmallConfetti } from "@/lib/confetti";
 
 interface UserProfile {
   displayName: string;
+  collegeName: string;
   fieldOfStudy: string;
   currentYear: string;
 }
@@ -83,6 +85,7 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [profile, setProfile] = useState<UserProfile>({
     displayName: "",
+    collegeName: "",
     fieldOfStudy: "",
     currentYear: "",
   });
@@ -103,6 +106,7 @@ export default function ProfilePage() {
         const data = profileDoc.data();
         setProfile({
           displayName: data.displayName || user.displayName || "",
+          collegeName: data.collegeName || "",
           fieldOfStudy: data.fieldOfStudy || "",
           currentYear: data.currentYear || "",
         });
@@ -110,6 +114,7 @@ export default function ProfilePage() {
         // Initialize with user's display name from auth
         setProfile({
           displayName: user.displayName || "",
+          collegeName: "",
           fieldOfStudy: "",
           currentYear: "",
         });
@@ -246,6 +251,28 @@ export default function ProfilePage() {
                   Verified
                 </Badge>
               </div>
+            </div>
+
+            {/* College Name */}
+            <div className="space-y-2">
+              <Label htmlFor="collegeName" className="flex items-center gap-2">
+                <Building className="h-4 w-4 text-muted-foreground" />
+                College / University
+              </Label>
+              {isEditing ? (
+                <Input
+                  id="collegeName"
+                  value={profile.collegeName}
+                  onChange={(e) =>
+                    setProfile({ ...profile, collegeName: e.target.value })
+                  }
+                  placeholder="Enter your college name"
+                />
+              ) : (
+                <p className="text-sm py-2 px-3 rounded-md bg-muted/50">
+                  {profile.collegeName || "Not set"}
+                </p>
+              )}
             </div>
 
             {/* Field of Study */}

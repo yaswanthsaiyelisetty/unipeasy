@@ -245,11 +245,13 @@ function ConnectSection() {
 }
 
 export default function AboutPage() {
-  const { displayText, isComplete } = useTypewriter("Academic Excellence, Redefined.", 60);
+  const { displayText, isComplete } = useTypewriter("Your Academic Success Partner.", 60);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    // Scroll to top when the page loads
+    window.scrollTo(0, 0);
   }, []);
 
   if (!mounted) return null;
@@ -285,7 +287,7 @@ export default function AboutPage() {
             >
               <Badge variant="secondary" className="mb-6 gap-1.5">
                 <Sparkles className="h-3.5 w-3.5" />
-                AI-Powered Learning Platform
+                Built by Students, for Students
               </Badge>
             </motion.div>
 
@@ -302,8 +304,8 @@ export default function AboutPage() {
               transition={{ delay: 2, duration: 0.5 }}
               className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto mb-8"
             >
-              One centralized platform for the modern student. Verified materials,
-              AI-powered strategies, and industry-level skill tracks—all in one place.
+              UniPeasy simplifies your academic journey with verified study materials,
+              AI-powered learning tools, and real opportunities—all in one trusted platform.
             </motion.p>
 
             <motion.div

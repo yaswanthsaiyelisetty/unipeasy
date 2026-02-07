@@ -3,13 +3,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  Play, 
-  Pause, 
-  SkipForward, 
-  SkipBack, 
-  Volume2, 
-  VolumeX, 
+import {
+  Play,
+  Pause,
+  SkipForward,
+  SkipBack,
+  Volume2,
+  VolumeX,
   Maximize2,
   Minimize2,
   RefreshCw,
@@ -142,7 +142,7 @@ const FloatingParticles = () => (
 // Parse explanation into story scenes
 function parseToStoryScenes(topic: string, explanation: string, analogy?: string): StoryScene[] {
   const scenes: StoryScene[] = [];
-  
+
   // Scene 1: Introduction
   scenes.push({
     id: 1,
@@ -163,12 +163,12 @@ function parseToStoryScenes(topic: string, explanation: string, analogy?: string
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
 
   const paragraphs = cleanText.split(/\n\n+/).filter(p => p.trim().length > 30);
-  
+
   // Extract key points from paragraphs
   paragraphs.slice(0, 4).forEach((para, index) => {
     const sentences = para.split(/(?<=[.!?])\s+/).filter(s => s.length > 20);
     const keyPoints = sentences.slice(0, 3).map(s => s.trim());
-    
+
     scenes.push({
       id: scenes.length + 1,
       title: index === 0 ? 'The Big Picture' : `Key Concept ${index}`,
@@ -187,7 +187,7 @@ function parseToStoryScenes(topic: string, explanation: string, analogy?: string
       .replace(/\*\*(.*?)\*\*/g, '$1')
       .replace(/\*(.*?)\*/g, '$1')
       .substring(0, 300);
-    
+
     scenes.push({
       id: scenes.length + 1,
       title: 'Think of it this way...',
@@ -228,16 +228,21 @@ export function AnimatedStoryVideo({ topic, explanation, analogy, className }: A
   const progressInterval = useRef<NodeJS.Timeout | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
-  
+
   const { speak, stop, isSpeaking, downloadAudio, isDownloading } = useTextToSpeech({ rate: 0.95 });
 
-  const SCENE_DURATION = 8000; // 8 seconds per scene
+  const FIRST_SCENE_DURATION = 15000; // 15 seconds for intro slide
+  const OTHER_SCENE_DURATION = 30000; // 30 seconds for content slides
+
+  const getSceneDuration = (sceneIndex: number) => {
+    return sceneIndex === 0 ? FIRST_SCENE_DURATION : OTHER_SCENE_DURATION;
+  };
 
   const goToScene = useCallback((index: number) => {
     const newIndex = Math.max(0, Math.min(scenes.length - 1, index));
     setCurrentScene(newIndex);
     setProgress(0);
-    
+
     if (!isMuted && isPlaying) {
       stop();
       setTimeout(() => speak(scenes[newIndex].narration), 500);
@@ -308,32 +313,32 @@ export function AnimatedStoryVideo({ topic, explanation, analogy, className }: A
   // Download video by recording the canvas
   const handleDownloadVideo = useCallback(async () => {
     if (!videoAreaRef.current) return;
-    
+
     setIsRecording(true);
     setRecordingProgress(0);
     recordedChunksRef.current = [];
-    
+
     try {
       // Create a canvas stream from the video area
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d')!;
       canvas.width = 1280;
       canvas.height = 720;
-      
+
       const stream = canvas.captureStream(30);
       const mediaRecorder = new MediaRecorder(stream, {
         mimeType: 'video/webm;codecs=vp9',
         videoBitsPerSecond: 2500000
       });
-      
+
       mediaRecorderRef.current = mediaRecorder;
-      
+
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           recordedChunksRef.current.push(event.data);
         }
       };
-      
+
       mediaRecorder.onstop = () => {
         const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
         const url = URL.createObjectURL(blob);
@@ -347,37 +352,37 @@ export function AnimatedStoryVideo({ topic, explanation, analogy, className }: A
         URL.revokeObjectURL(url);
         setIsRecording(false);
       };
-      
+
       mediaRecorder.start(100);
-      
+
       // Record each scene
       for (let i = 0; i < scenes.length; i++) {
         setRecordingProgress(Math.round((i / scenes.length) * 100));
-        
+
         // Create frame content for this scene
         const scene = scenes[i];
         const gradient = getGradientColors(scene.visual);
-        
+
         // Draw frame
         const grd = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
         grd.addColorStop(0, gradient[0]);
         grd.addColorStop(1, gradient[1]);
         ctx.fillStyle = grd;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
+
         // Add title
         ctx.fillStyle = 'white';
         ctx.font = 'bold 48px Arial';
         ctx.textAlign = 'center';
         ctx.fillText(scene.title, canvas.width / 2, 150);
-        
+
         // Add narration text (wrapped)
         ctx.font = '28px Arial';
         const words = scene.narration.split(' ');
         let line = '';
         let y = 300;
         const maxWidth = canvas.width - 200;
-        
+
         for (const word of words) {
           const testLine = line + word + ' ';
           const metrics = ctx.measureText(testLine);
@@ -391,22 +396,22 @@ export function AnimatedStoryVideo({ topic, explanation, analogy, className }: A
           }
         }
         ctx.fillText(line, canvas.width / 2, y);
-        
+
         // Add scene indicator
         ctx.font = '24px Arial';
         ctx.fillText(`Scene ${i + 1} of ${scenes.length}`, canvas.width / 2, canvas.height - 50);
-        
+
         // Wait for scene duration
         await new Promise(resolve => setTimeout(resolve, 4000));
       }
-      
+
       setRecordingProgress(100);
       mediaRecorder.stop();
-      
+
     } catch (error) {
       console.error('Recording failed:', error);
       setIsRecording(false);
-      
+
       // Fallback: Download as HTML presentation
       downloadAsHTML();
     }
@@ -459,7 +464,7 @@ export function AnimatedStoryVideo({ topic, explanation, analogy, className }: A
   </script>
 </body>
 </html>`;
-    
+
     const blob = new Blob([htmlContent], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -483,16 +488,17 @@ export function AnimatedStoryVideo({ topic, explanation, analogy, className }: A
     }
   };
 
-  // Auto-advance scenes
+  // Auto-advance scenes with dynamic duration
   useEffect(() => {
     if (isPlaying) {
+      const sceneDuration = getSceneDuration(currentScene);
       progressInterval.current = setInterval(() => {
         setProgress(prev => {
           if (prev >= 100) {
             nextScene();
             return 0;
           }
-          return prev + (100 / (SCENE_DURATION / 100));
+          return prev + (100 / (sceneDuration / 100));
         });
       }, 100);
     } else {
@@ -502,7 +508,7 @@ export function AnimatedStoryVideo({ topic, explanation, analogy, className }: A
     return () => {
       if (progressInterval.current) clearInterval(progressInterval.current);
     };
-  }, [isPlaying, nextScene]);
+  }, [isPlaying, nextScene, currentScene]);
 
   // Cleanup
   useEffect(() => {
@@ -543,7 +549,7 @@ export function AnimatedStoryVideo({ topic, explanation, analogy, className }: A
 
   return (
     <Card className={cn("overflow-hidden bg-black", className)}>
-      <div 
+      <div
         ref={containerRef}
         className={cn(
           "relative",
@@ -551,19 +557,19 @@ export function AnimatedStoryVideo({ topic, explanation, analogy, className }: A
         )}
       >
         {/* Video Area */}
-        <div 
+        <div
           ref={videoAreaRef}
           className={cn(
-          "relative aspect-video overflow-hidden",
-          isFullscreen && "h-[calc(100%-80px)]"
-        )}>
+            "relative min-h-[400px] sm:min-h-[450px] md:aspect-video overflow-hidden overflow-y-auto",
+            isFullscreen && "h-[calc(100%-80px)]"
+          )}>
           {/* Animated Background */}
           <div className={cn(
             "absolute inset-0 bg-gradient-to-br transition-all duration-1000",
             getBackground(scene.visual)
           )}>
             <FloatingParticles />
-            
+
             {/* Animated shapes */}
             <div className="absolute top-10 left-10 w-20 h-20 bg-white/10 rounded-full animate-pulse" />
             <div className="absolute bottom-20 right-20 w-32 h-32 bg-white/5 rounded-full animate-bounce" style={{ animationDuration: '3s' }} />
@@ -571,9 +577,9 @@ export function AnimatedStoryVideo({ topic, explanation, analogy, className }: A
           </div>
 
           {/* Main Content */}
-          <div className="absolute inset-0 flex items-center justify-center p-6 sm:p-8 md:p-12">
-            <div className="flex flex-col md:flex-row items-center gap-6 md:gap-12 max-w-5xl" key={scene.id}>
-              
+          <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-6 md:p-8 lg:p-12">
+            <div className="flex flex-col items-center gap-4 sm:gap-6 md:flex-row md:gap-12 max-w-5xl w-full" key={scene.id}>
+
               {/* Character */}
               <div className="flex-shrink-0">
                 {renderCharacter()}
@@ -583,7 +589,7 @@ export function AnimatedStoryVideo({ topic, explanation, analogy, className }: A
               <div className="flex-1 text-center md:text-left">
                 {/* Title */}
                 <h2 className={cn(
-                  "text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-lg",
+                  "text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2 sm:mb-4 drop-shadow-lg",
                   scene.animation === 'bounceIn' && "animate-in fade-in zoom-in duration-500",
                   scene.animation === 'slideUp' && "animate-in fade-in slide-in-from-bottom-8 duration-500",
                   scene.animation === 'zoomIn' && "animate-in fade-in zoom-in-50 duration-500",
@@ -595,9 +601,9 @@ export function AnimatedStoryVideo({ topic, explanation, analogy, className }: A
                 </h2>
 
                 {/* Narration text - animated typewriter style */}
-                <div className="relative">
+                <div className="relative max-h-[180px] sm:max-h-[220px] md:max-h-none overflow-y-auto scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-transparent">
                   <p className={cn(
-                    "text-base sm:text-lg md:text-xl text-white/90 leading-relaxed drop-shadow",
+                    "text-sm sm:text-base md:text-lg lg:text-xl text-white/90 leading-relaxed drop-shadow",
                     "animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300"
                   )}>
                     {scene.narration}
@@ -606,14 +612,14 @@ export function AnimatedStoryVideo({ topic, explanation, analogy, className }: A
 
                 {/* Key Points */}
                 {scene.keyPoints && scene.keyPoints.length > 0 && (
-                  <div className="mt-6 space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500">
+                  <div className="mt-3 sm:mt-4 md:mt-6 space-y-1 sm:space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500">
                     {scene.keyPoints.map((point, idx) => (
-                      <div 
+                      <div
                         key={idx}
-                        className="flex items-start gap-2 text-white/80 text-sm sm:text-base"
+                        className="flex items-start gap-2 text-white/80 text-xs sm:text-sm md:text-base"
                         style={{ animationDelay: `${600 + idx * 200}ms` }}
                       >
-                        <span className="text-yellow-300 mt-1">✦</span>
+                        <span className="text-yellow-300 mt-0.5 sm:mt-1">✦</span>
                         <span className="line-clamp-2">{point}</span>
                       </div>
                     ))}
@@ -624,15 +630,15 @@ export function AnimatedStoryVideo({ topic, explanation, analogy, className }: A
           </div>
 
           {/* Scene Indicators */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2">
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1 sm:gap-2 flex-wrap justify-center max-w-[90%]">
             {scenes.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToScene(index)}
                 className={cn(
                   "transition-all duration-300 rounded-full",
-                  index === currentScene 
-                    ? "w-8 h-2 bg-white" 
+                  index === currentScene
+                    ? "w-6 sm:w-8 h-2 bg-white"
                     : "w-2 h-2 bg-white/40 hover:bg-white/60"
                 )}
               />
@@ -641,7 +647,7 @@ export function AnimatedStoryVideo({ topic, explanation, analogy, className }: A
 
           {/* Progress bar */}
           <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/30">
-            <div 
+            <div
               className="h-full bg-white transition-all duration-100"
               style={{ width: `${progress}%` }}
             />
@@ -687,9 +693,9 @@ export function AnimatedStoryVideo({ topic, explanation, analogy, className }: A
 
           <div className="flex items-center gap-1 sm:gap-2">
             {/* Download Audio Button */}
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={handleDownloadAudio}
               disabled={isDownloading}
               className="text-white hover:bg-white/10"
@@ -701,11 +707,11 @@ export function AnimatedStoryVideo({ topic, explanation, analogy, className }: A
                 <Volume2 className="h-4 w-4" />
               )}
             </Button>
-            
+
             {/* Download Video Button */}
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={handleDownloadVideo}
               disabled={isRecording}
               className="text-white hover:bg-white/10"
@@ -717,7 +723,7 @@ export function AnimatedStoryVideo({ topic, explanation, analogy, className }: A
                 <Download className="h-4 w-4" />
               )}
             </Button>
-            
+
             <Button variant="ghost" size="icon" onClick={toggleMute} className="text-white hover:bg-white/10">
               {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
             </Button>

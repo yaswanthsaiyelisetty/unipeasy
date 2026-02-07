@@ -19,12 +19,12 @@ export const staggerContainer: Variants = {
 
 // Fade up animation for cards and sections
 export const fadeUpVariant: Variants = {
-  hidden: { 
-    opacity: 0, 
+  hidden: {
+    opacity: 0,
     y: 20,
   },
-  show: { 
-    opacity: 1, 
+  show: {
+    opacity: 1,
     y: 0,
     transition: {
       type: "spring",
@@ -36,12 +36,12 @@ export const fadeUpVariant: Variants = {
 
 // Scale up with fade for interactive elements
 export const scaleUpVariant: Variants = {
-  hidden: { 
-    opacity: 0, 
+  hidden: {
+    opacity: 0,
     scale: 0.95,
   },
-  show: { 
-    opacity: 1, 
+  show: {
+    opacity: 1,
     scale: 1,
     transition: {
       type: "spring",
@@ -53,12 +53,12 @@ export const scaleUpVariant: Variants = {
 
 // Slide in from left
 export const slideInLeft: Variants = {
-  hidden: { 
-    opacity: 0, 
+  hidden: {
+    opacity: 0,
     x: -30,
   },
-  show: { 
-    opacity: 1, 
+  show: {
+    opacity: 1,
     x: 0,
     transition: {
       type: "spring",
@@ -70,12 +70,12 @@ export const slideInLeft: Variants = {
 
 // Slide in from right
 export const slideInRight: Variants = {
-  hidden: { 
-    opacity: 0, 
+  hidden: {
+    opacity: 0,
     x: 30,
   },
-  show: { 
-    opacity: 1, 
+  show: {
+    opacity: 1,
     x: 0,
     transition: {
       type: "spring",
@@ -89,7 +89,7 @@ export const slideInRight: Variants = {
 export const hoverGlow = {
   scale: 1.02,
   transition: { type: "spring", stiffness: 400, damping: 17 },
-};
+} as const;
 
 // Tap effect configuration
 export const tapEffect = {
@@ -99,11 +99,11 @@ export const tapEffect = {
 // Button press animation
 export const buttonVariants: Variants = {
   idle: { scale: 1 },
-  hover: { 
+  hover: {
     scale: 1.03,
     transition: { type: "spring", stiffness: 400, damping: 17 },
   },
-  tap: { 
+  tap: {
     scale: 0.97,
     transition: { type: "spring", stiffness: 400, damping: 17 },
   },
@@ -111,11 +111,11 @@ export const buttonVariants: Variants = {
 
 // Card hover with glow
 export const cardHoverVariants: Variants = {
-  idle: { 
+  idle: {
     scale: 1,
     boxShadow: "0 0 0 0 rgba(var(--primary), 0)",
   },
-  hover: { 
+  hover: {
     scale: 1.02,
     boxShadow: "0 0 20px 2px rgba(var(--primary), 0.15)",
     transition: { type: "spring", stiffness: 400, damping: 17 },
@@ -140,8 +140,8 @@ export const pulseGlow: Variants = {
 // List item stagger for menus
 export const listItemVariant: Variants = {
   hidden: { opacity: 0, x: -10 },
-  show: { 
-    opacity: 1, 
+  show: {
+    opacity: 1,
     x: 0,
     transition: {
       type: "spring",
@@ -154,16 +154,16 @@ export const listItemVariant: Variants = {
 // Page transition variants
 export const pageVariants: Variants = {
   initial: { opacity: 0, y: 10 },
-  animate: { 
-    opacity: 1, 
+  animate: {
+    opacity: 1,
     y: 0,
     transition: {
       duration: 0.3,
       ease: "easeOut",
     },
   },
-  exit: { 
-    opacity: 0, 
+  exit: {
+    opacity: 0,
     y: -10,
     transition: {
       duration: 0.2,
@@ -199,8 +199,8 @@ export const shimmerVariant: Variants = {
 // Success checkmark animation
 export const checkmarkVariant: Variants = {
   hidden: { pathLength: 0, opacity: 0 },
-  show: { 
-    pathLength: 1, 
+  show: {
+    pathLength: 1,
     opacity: 1,
     transition: {
       pathLength: { duration: 0.5, ease: "easeOut" },
@@ -211,13 +211,13 @@ export const checkmarkVariant: Variants = {
 
 // Modal/Dialog animation
 export const modalVariants: Variants = {
-  hidden: { 
-    opacity: 0, 
+  hidden: {
+    opacity: 0,
     scale: 0.95,
     y: 10,
   },
-  show: { 
-    opacity: 1, 
+  show: {
+    opacity: 1,
     scale: 1,
     y: 0,
     transition: {
@@ -226,8 +226,8 @@ export const modalVariants: Variants = {
       damping: 25,
     },
   },
-  exit: { 
-    opacity: 0, 
+  exit: {
+    opacity: 0,
     scale: 0.95,
     y: 10,
     transition: {
@@ -239,9 +239,9 @@ export const modalVariants: Variants = {
 // Notification slide in
 export const notificationVariant: Variants = {
   hidden: { opacity: 0, x: 100, scale: 0.9 },
-  show: { 
-    opacity: 1, 
-    x: 0, 
+  show: {
+    opacity: 1,
+    x: 0,
     scale: 1,
     transition: {
       type: "spring",
@@ -249,9 +249,9 @@ export const notificationVariant: Variants = {
       damping: 25,
     },
   },
-  exit: { 
-    opacity: 0, 
-    x: 100, 
+  exit: {
+    opacity: 0,
+    x: 100,
     scale: 0.9,
     transition: {
       duration: 0.2,

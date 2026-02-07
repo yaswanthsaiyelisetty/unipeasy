@@ -14,6 +14,7 @@ import {
   User,
   LogOut,
   FolderOpen,
+  Trophy,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -66,6 +67,11 @@ const navItems = [
     href: "/internships",
     icon: Briefcase,
     label: "Internships",
+  },
+  {
+    href: "/hackathons",
+    icon: Trophy,
+    label: "Hackathons",
   },
   {
     href: "/memory-palace",
@@ -191,7 +197,10 @@ export function Navigation() {
       <SidebarSeparator className="bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
       <SidebarFooter className="p-3">
         <div className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-br from-primary/10 via-purple-500/10 to-pink-500/10 border border-primary/20 shadow-lg shadow-primary/5 hover:shadow-xl hover:border-primary/30 transition-all duration-300 overflow-hidden">
-          <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
+          <div
+            onClick={() => handleNavigation("/profile")}
+            className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+          >
             <Avatar className="ring-2 ring-primary/50 ring-offset-2 ring-offset-background shadow-lg shadow-primary/20 flex-shrink-0">
               <AvatarImage src={user?.photoURL || `https://picsum.photos/seed/${user?.uid}/40/40`} />
               <AvatarFallback className="bg-gradient-to-br from-primary to-purple-500 text-white font-semibold">

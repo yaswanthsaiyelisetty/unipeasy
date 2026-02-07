@@ -101,6 +101,24 @@ const quickAccessItems = [
     gradient: "from-cyan-500/10 to-teal-500/10",
     iconColor: "text-cyan-400",
   },
+  {
+    title: "Hackathons",
+    href: "/hackathons",
+    icon: Trophy,
+    description: "Competitions & prizes",
+    requiresPlan: false,
+    gradient: "from-violet-500/10 to-purple-500/10",
+    iconColor: "text-violet-400",
+  },
+  {
+    title: "About UniPeasy",
+    href: "/about",
+    icon: Sparkles,
+    description: "Meet the team",
+    requiresPlan: false,
+    gradient: "from-pink-500/10 to-rose-500/10",
+    iconColor: "text-pink-400",
+  },
 ];
 
 type ProgressData = {

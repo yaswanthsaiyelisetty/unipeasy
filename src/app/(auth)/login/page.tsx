@@ -26,13 +26,12 @@ import {
 import { Rocket, Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { auth, googleProvider, db } from "@/lib/firebase";
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  updateProfile,
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  updateProfile, 
   sendPasswordResetEmail,
-  signInWithPopup,
-  onAuthStateChanged
+  signInWithPopup
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
@@ -55,10 +54,10 @@ const loginSchema = z.object({
 });
 
 const signupSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  email: z.string().email({ message: "Please enter a valid email." }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
-});
+    name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+    email: z.string().email({ message: "Please enter a valid email." }),
+    password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 type SignupFormValues = z.infer<typeof signupSchema>;
@@ -97,22 +96,6 @@ export default function LoginPage() {
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
-  const [authLoading, setAuthLoading] = useState(true);
-
-  // Check if user is already logged in and redirect to dashboard
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // User is already logged in, redirect to dashboard
-        router.replace("/dashboard");
-      } else {
-        // User is not logged in, show the login page
-        setAuthLoading(false);
-      }
-    });
-
-    return () => unsubscribe();
-  }, [router]);
 
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -143,11 +126,11 @@ export default function LoginPage() {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
-
+      
       // Check if user exists in Firestore
       const userPlanRef = doc(db, 'userPlans', user.uid);
       const planDoc = await getDoc(userPlanRef);
-
+      
       if (!planDoc.exists()) {
         // New user - create user document with hasActivePlan: false
         await setDoc(userPlanRef, {
@@ -158,14 +141,14 @@ export default function LoginPage() {
           paidPrice: 0,
           isNewGoogleUser: true, // Flag for triggering claim modal
         });
-        toast({
-          title: "Welcome to UniPeasy! 🎉",
-          description: "Your account has been created. Claim your free plan!"
+        toast({ 
+          title: "Welcome to UniPeasy! 🎉", 
+          description: "Your account has been created. Claim your free plan!" 
         });
       } else {
         toast({ title: "Welcome back!", description: `Good to see you, ${user.displayName || 'Student'}!` });
       }
-
+      
       router.push("/dashboard");
     } catch (error: any) {
       if (error.code === 'auth/popup-closed-by-user') {
@@ -187,9 +170,9 @@ export default function LoginPage() {
     setResetLoading(true);
     try {
       await sendPasswordResetEmail(auth, resetEmail);
-      toast({
-        title: "Password Reset Email Sent",
-        description: "Check your inbox (and spam folder) for a link to reset your password. Note: You can only request one email every few minutes."
+      toast({ 
+        title: "Password Reset Email Sent", 
+        description: "Check your inbox (and spam folder) for a link to reset your password. Note: You can only request one email every few minutes." 
       });
       setForgotPasswordOpen(false);
       setResetEmail("");
@@ -222,15 +205,6 @@ export default function LoginPage() {
     }
   }
 
-  // Show loading screen while checking auth state
-  if (authLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <Loader2 className="w-12 h-12 animate-spin text-primary" />
-      </div>
-    );
-  }
-
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
       <div className="flex items-center gap-4 mb-8">
@@ -251,7 +225,7 @@ export default function LoginPage() {
                 <CardTitle className="font-headline text-3xl">Welcome Back!</CardTitle>
                 <CardDescription>Sign in to continue your journey.</CardDescription>
               </CardHeader>
-
+              
               {/* Google Sign-In Button */}
               <Button
                 type="button"
@@ -324,7 +298,7 @@ export default function LoginPage() {
               </Form>
             </TabsContent>
             <TabsContent value="signup" className="p-6">
-              <CardHeader className="p-0 mb-6">
+            <CardHeader className="p-0 mb-6">
                 <CardTitle className="font-headline text-3xl">Create an Account</CardTitle>
                 <CardDescription>Join us to start your learning journey.</CardDescription>
               </CardHeader>
@@ -358,7 +332,7 @@ export default function LoginPage() {
 
               <Form {...signupForm}>
                 <form onSubmit={signupForm.handleSubmit(onSignup)} className="space-y-6">
-                  <FormField
+                <FormField
                     control={signupForm.control}
                     name="name"
                     render={({ field }) => (
@@ -428,7 +402,7 @@ export default function LoginPage() {
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={resetLoading}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+            <AlertDialogAction 
               onClick={(e) => {
                 e.preventDefault();
                 handleForgotPassword();

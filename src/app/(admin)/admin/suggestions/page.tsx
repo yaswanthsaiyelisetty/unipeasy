@@ -68,7 +68,9 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { InternshipCategory, categoryLabels } from "@/lib/internships-data";
+import { HackathonCategory, categoryLabels as hackathonCategoryLabels } from "@/lib/hackathons-data";
 import { cn } from "@/lib/utils";
+import { Briefcase, Trophy } from "lucide-react";
 
 interface InternshipSuggestion {
     id: string;
@@ -84,10 +86,28 @@ interface InternshipSuggestion {
     reviewNote?: string;
 }
 
+interface HackathonSuggestion {
+    id: string;
+    name: string;
+    link: string;
+    description: string | null;
+    submittedBy: string;
+    submittedByUid: string | null;
+    submittedByName: string;
+    status: "pending" | "approved" | "rejected";
+    createdAt: Timestamp | { seconds: number; nanoseconds: number };
+    reviewedAt?: Timestamp | { seconds: number; nanoseconds: number };
+    reviewNote?: string;
+}
+
 type FilterStatus = "all" | "pending" | "approved" | "rejected";
+type SuggestionTab = "internships" | "hackathons";
 
 export default function AdminSuggestionsPage() {
     const { toast } = useToast();
+    const [activeTab, setActiveTab] = useState<SuggestionTab>("internships");
+
+    // Internship suggestions state
     const [suggestions, setSuggestions] = useState<InternshipSuggestion[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
@@ -98,6 +118,16 @@ export default function AdminSuggestionsPage() {
     const [deleteTarget, setDeleteTarget] = useState<InternshipSuggestion | null>(null);
     const [processing, setProcessing] = useState(false);
 
+    // Hackathon suggestions state
+    const [hackathonSuggestions, setHackathonSuggestions] = useState<HackathonSuggestion[]>([]);
+    const [hackathonLoading, setHackathonLoading] = useState(true);
+    const [hackSearchQuery, setHackSearchQuery] = useState("");
+    const [hackFilterStatus, setHackFilterStatus] = useState<FilterStatus>("all");
+    const [selectedHackathonSuggestion, setSelectedHackathonSuggestion] = useState<HackathonSuggestion | null>(null);
+    const [hackViewDialogOpen, setHackViewDialogOpen] = useState(false);
+    const [hackApproveDialogOpen, setHackApproveDialogOpen] = useState(false);
+    const [hackDeleteTarget, setHackDeleteTarget] = useState<HackathonSuggestion | null>(null);
+
     // Form data for approving (converting to real internship)
     const [approveFormData, setApproveFormData] = useState({
         name: "",
@@ -107,6 +137,18 @@ export default function AdminSuggestionsPage() {
         deadline: "",
         location: "",
         stipend: "",
+    });
+
+    // Form data for approving hackathon
+    const [hackathonApproveFormData, setHackathonApproveFormData] = useState({
+        name: "",
+        details: "",
+        link: "",
+        category: "tech" as HackathonCategory,
+        deadline: "",
+        location: "",
+        prizePool: "",
+        teamSize: "",
     });
 
     const fetchSuggestions = async () => {
@@ -135,7 +177,7 @@ export default function AdminSuggestionsPage() {
             console.error("Error fetching suggestions:", error);
             toast({
                 title: "Error",
-                description: "Failed to load suggestions. Please try again.",
+                description: "Failed to load internship suggestions. Please try again.",
                 variant: "destructive",
             });
         } finally {
@@ -143,8 +185,43 @@ export default function AdminSuggestionsPage() {
         }
     };
 
+    const fetchHackathonSuggestions = async () => {
+        try {
+            setHackathonLoading(true);
+            const querySnapshot = await getDocs(collection(db, "hackathon_suggestions"));
+            const list: HackathonSuggestion[] = [];
+            querySnapshot.forEach((docSnap) => {
+                list.push({
+                    id: docSnap.id,
+                    ...docSnap.data(),
+                } as HackathonSuggestion);
+            });
+            // Sort by createdAt (newest first)
+            list.sort((a, b) => {
+                const aTime = a.createdAt && typeof a.createdAt === 'object' && 'seconds' in a.createdAt
+                    ? a.createdAt.seconds
+                    : 0;
+                const bTime = b.createdAt && typeof b.createdAt === 'object' && 'seconds' in b.createdAt
+                    ? b.createdAt.seconds
+                    : 0;
+                return bTime - aTime;
+            });
+            setHackathonSuggestions(list);
+        } catch (error) {
+            console.error("Error fetching hackathon suggestions:", error);
+            toast({
+                title: "Error",
+                description: "Failed to load hackathon suggestions. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setHackathonLoading(false);
+        }
+    };
+
     useEffect(() => {
         fetchSuggestions();
+        fetchHackathonSuggestions();
     }, []);
 
     const formatDate = (timestamp: Timestamp | { seconds: number; nanoseconds: number } | undefined) => {
@@ -353,465 +430,727 @@ export default function AdminSuggestionsPage() {
                         <div className="p-2 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20">
                             <Lightbulb className="h-6 w-6 text-amber-500" />
                         </div>
-                        Internship Suggestions
+                        Suggestions
                     </h1>
                     <p className="text-sm sm:text-base text-muted-foreground mt-1">
-                        Review and approve internship suggestions from students
+                        Review and approve suggestions from students
                     </p>
                 </div>
-                <Button variant="outline" onClick={fetchSuggestions} disabled={loading}>
-                    <RefreshCw className={cn("h-4 w-4 mr-2", loading && "animate-spin")} />
+                <Button
+                    variant="outline"
+                    onClick={activeTab === "internships" ? fetchSuggestions : fetchHackathonSuggestions}
+                    disabled={activeTab === "internships" ? loading : hackathonLoading}
+                >
+                    <RefreshCw className={cn("h-4 w-4 mr-2", (activeTab === "internships" ? loading : hackathonLoading) && "animate-spin")} />
                     Refresh
                 </Button>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <Card className="cursor-pointer hover:shadow-md transition-all" onClick={() => setFilterStatus("all")}>
-                    <CardContent className="pt-6">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
-                                <Lightbulb className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                            </div>
-                            <div>
-                                <p className="text-2xl font-bold text-foreground">{statusCounts.all}</p>
-                                <p className="text-sm text-muted-foreground">Total</p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card
+            {/* Tab Switcher */}
+            <div className="flex gap-2 border-b pb-2">
+                <Button
+                    variant={activeTab === "internships" ? "default" : "ghost"}
+                    onClick={() => setActiveTab("internships")}
                     className={cn(
-                        "cursor-pointer hover:shadow-md transition-all",
-                        filterStatus === "pending" && "ring-2 ring-amber-500"
+                        "gap-2",
+                        activeTab === "internships" && "bg-blue-600 hover:bg-blue-700"
                     )}
-                    onClick={() => setFilterStatus("pending")}
                 >
-                    <CardContent className="pt-6">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg relative">
-                                <Clock className="h-6 w-6 text-amber-600 dark:text-amber-400" />
-                                {statusCounts.pending > 0 && (
-                                    <span className="absolute -top-1 -right-1 h-5 w-5 bg-amber-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse">
-                                        {statusCounts.pending}
-                                    </span>
-                                )}
-                            </div>
-                            <div>
-                                <p className="text-2xl font-bold text-foreground">{statusCounts.pending}</p>
-                                <p className="text-sm text-muted-foreground">Pending</p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card
+                    <Briefcase className="h-4 w-4" />
+                    Internships
+                    {suggestions.filter(s => s.status === "pending").length > 0 && (
+                        <Badge className="bg-amber-500 text-white text-xs ml-1">
+                            {suggestions.filter(s => s.status === "pending").length}
+                        </Badge>
+                    )}
+                </Button>
+                <Button
+                    variant={activeTab === "hackathons" ? "default" : "ghost"}
+                    onClick={() => setActiveTab("hackathons")}
                     className={cn(
-                        "cursor-pointer hover:shadow-md transition-all",
-                        filterStatus === "approved" && "ring-2 ring-emerald-500"
+                        "gap-2",
+                        activeTab === "hackathons" && "bg-violet-600 hover:bg-violet-700"
                     )}
-                    onClick={() => setFilterStatus("approved")}
                 >
-                    <CardContent className="pt-6">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg">
-                                <CheckCircle2 className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-                            </div>
-                            <div>
-                                <p className="text-2xl font-bold text-foreground">{statusCounts.approved}</p>
-                                <p className="text-sm text-muted-foreground">Approved</p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card
-                    className={cn(
-                        "cursor-pointer hover:shadow-md transition-all",
-                        filterStatus === "rejected" && "ring-2 ring-red-500"
+                    <Trophy className="h-4 w-4" />
+                    Hackathons
+                    {hackathonSuggestions.filter(s => s.status === "pending").length > 0 && (
+                        <Badge className="bg-amber-500 text-white text-xs ml-1">
+                            {hackathonSuggestions.filter(s => s.status === "pending").length}
+                        </Badge>
                     )}
-                    onClick={() => setFilterStatus("rejected")}
-                >
-                    <CardContent className="pt-6">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg">
-                                <XCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
-                            </div>
-                            <div>
-                                <p className="text-2xl font-bold text-foreground">{statusCounts.rejected}</p>
-                                <p className="text-sm text-muted-foreground">Rejected</p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                </Button>
             </div>
 
-            {/* Suggestions List */}
-            <Card>
-                <CardHeader className="pb-4">
-                    <div className="flex flex-col gap-4">
-                        <CardTitle className="flex items-center gap-2">
-                            <Sparkles className="h-5 w-5 text-amber-500" />
-                            Student Suggestions
-                        </CardTitle>
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                            <div className="relative flex-1 sm:flex-none">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Search by name or submitter..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-9 w-full sm:w-[280px]"
-                                />
-                            </div>
-                            <div className="flex gap-2">
-                                <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as FilterStatus)}>
-                                    <SelectTrigger className="w-[140px]">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All ({statusCounts.all})</SelectItem>
-                                        <SelectItem value="pending">Pending ({statusCounts.pending})</SelectItem>
-                                        <SelectItem value="approved">Approved ({statusCounts.approved})</SelectItem>
-                                        <SelectItem value="rejected">Rejected ({statusCounts.rejected})</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    {loading ? (
-                        <div className="flex items-center justify-center py-12">
-                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                            <span className="ml-3 text-muted-foreground">Loading suggestions...</span>
-                        </div>
-                    ) : filteredSuggestions.length === 0 ? (
-                        <div className="text-center py-12">
-                            <Lightbulb className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                            <h3 className="text-lg font-semibold text-foreground">
-                                {searchQuery || filterStatus !== "all" ? "No suggestions found" : "No suggestions yet"}
-                            </h3>
-                            <p className="text-muted-foreground mt-1">
-                                {searchQuery || filterStatus !== "all"
-                                    ? "Try adjusting your filters"
-                                    : "Student suggestions will appear here"}
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="space-y-3">
-                            <AnimatePresence mode="popLayout">
-                                {filteredSuggestions.map((suggestion, index) => (
-                                    <motion.div
-                                        key={suggestion.id}
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -10 }}
-                                        transition={{ delay: index * 0.03 }}
-                                        className={cn(
-                                            "p-4 rounded-lg border bg-card hover:shadow-md transition-all",
-                                            suggestion.status === "pending" && "border-l-4 border-l-amber-500"
+            {/* Internship Suggestions Tab */}
+            {activeTab === "internships" && (
+                <>
+                    {/* Stats Cards */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <Card className="cursor-pointer hover:shadow-md transition-all" onClick={() => setFilterStatus("all")}>
+                            <CardContent className="pt-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                                        <Lightbulb className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl font-bold text-foreground">{statusCounts.all}</p>
+                                        <p className="text-sm text-muted-foreground">Total</p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                        <Card
+                            className={cn(
+                                "cursor-pointer hover:shadow-md transition-all",
+                                filterStatus === "pending" && "ring-2 ring-amber-500"
+                            )}
+                            onClick={() => setFilterStatus("pending")}
+                        >
+                            <CardContent className="pt-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg relative">
+                                        <Clock className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                                        {statusCounts.pending > 0 && (
+                                            <span className="absolute -top-1 -right-1 h-5 w-5 bg-amber-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse">
+                                                {statusCounts.pending}
+                                            </span>
                                         )}
-                                    >
-                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-start gap-3">
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl font-bold text-foreground">{statusCounts.pending}</p>
+                                        <p className="text-sm text-muted-foreground">Pending</p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                        <Card
+                            className={cn(
+                                "cursor-pointer hover:shadow-md transition-all",
+                                filterStatus === "approved" && "ring-2 ring-emerald-500"
+                            )}
+                            onClick={() => setFilterStatus("approved")}
+                        >
+                            <CardContent className="pt-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg">
+                                        <CheckCircle2 className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl font-bold text-foreground">{statusCounts.approved}</p>
+                                        <p className="text-sm text-muted-foreground">Approved</p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                        <Card
+                            className={cn(
+                                "cursor-pointer hover:shadow-md transition-all",
+                                filterStatus === "rejected" && "ring-2 ring-red-500"
+                            )}
+                            onClick={() => setFilterStatus("rejected")}
+                        >
+                            <CardContent className="pt-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg">
+                                        <XCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl font-bold text-foreground">{statusCounts.rejected}</p>
+                                        <p className="text-sm text-muted-foreground">Rejected</p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* Suggestions List */}
+                    <Card>
+                        <CardHeader className="pb-4">
+                            <div className="flex flex-col gap-4">
+                                <CardTitle className="flex items-center gap-2">
+                                    <Sparkles className="h-5 w-5 text-amber-500" />
+                                    Student Suggestions
+                                </CardTitle>
+                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                                    <div className="relative flex-1 sm:flex-none">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                            placeholder="Search by name or submitter..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="pl-9 w-full sm:w-[280px]"
+                                        />
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as FilterStatus)}>
+                                            <SelectTrigger className="w-[140px]">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">All ({statusCounts.all})</SelectItem>
+                                                <SelectItem value="pending">Pending ({statusCounts.pending})</SelectItem>
+                                                <SelectItem value="approved">Approved ({statusCounts.approved})</SelectItem>
+                                                <SelectItem value="rejected">Rejected ({statusCounts.rejected})</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            {loading ? (
+                                <div className="flex items-center justify-center py-12">
+                                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                    <span className="ml-3 text-muted-foreground">Loading suggestions...</span>
+                                </div>
+                            ) : filteredSuggestions.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <Lightbulb className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                                    <h3 className="text-lg font-semibold text-foreground">
+                                        {searchQuery || filterStatus !== "all" ? "No suggestions found" : "No suggestions yet"}
+                                    </h3>
+                                    <p className="text-muted-foreground mt-1">
+                                        {searchQuery || filterStatus !== "all"
+                                            ? "Try adjusting your filters"
+                                            : "Student suggestions will appear here"}
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    <AnimatePresence mode="popLayout">
+                                        {filteredSuggestions.map((suggestion, index) => (
+                                            <motion.div
+                                                key={suggestion.id}
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -10 }}
+                                                transition={{ delay: index * 0.03 }}
+                                                className={cn(
+                                                    "p-4 rounded-lg border bg-card hover:shadow-md transition-all",
+                                                    suggestion.status === "pending" && "border-l-4 border-l-amber-500"
+                                                )}
+                                            >
+                                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                                     <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center gap-2 flex-wrap mb-1">
-                                                            <h3 className="font-semibold text-foreground truncate">
-                                                                {suggestion.name}
-                                                            </h3>
-                                                            {getStatusBadge(suggestion.status)}
+                                                        <div className="flex items-start gap-3">
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="flex items-center gap-2 flex-wrap mb-1">
+                                                                    <h3 className="font-semibold text-foreground truncate">
+                                                                        {suggestion.name}
+                                                                    </h3>
+                                                                    {getStatusBadge(suggestion.status)}
+                                                                </div>
+                                                                <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
+                                                                    <span className="flex items-center gap-1">
+                                                                        <User className="h-3 w-3" />
+                                                                        {suggestion.submittedByName}
+                                                                    </span>
+                                                                    <span className="flex items-center gap-1">
+                                                                        <Mail className="h-3 w-3" />
+                                                                        {suggestion.submittedBy}
+                                                                    </span>
+                                                                    <span className="flex items-center gap-1">
+                                                                        <Calendar className="h-3 w-3" />
+                                                                        {formatDate(suggestion.createdAt)}
+                                                                    </span>
+                                                                </div>
+                                                                {suggestion.description && (
+                                                                    <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                                                                        {suggestion.description}
+                                                                    </p>
+                                                                )}
+                                                            </div>
                                                         </div>
-                                                        <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
-                                                            <span className="flex items-center gap-1">
-                                                                <User className="h-3 w-3" />
-                                                                {suggestion.submittedByName}
-                                                            </span>
-                                                            <span className="flex items-center gap-1">
-                                                                <Mail className="h-3 w-3" />
-                                                                {suggestion.submittedBy}
-                                                            </span>
-                                                            <span className="flex items-center gap-1">
-                                                                <Calendar className="h-3 w-3" />
-                                                                {formatDate(suggestion.createdAt)}
-                                                            </span>
-                                                        </div>
-                                                        {suggestion.description && (
-                                                            <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                                                                {suggestion.description}
-                                                            </p>
-                                                        )}
                                                     </div>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-2 shrink-0">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handleViewSuggestion(suggestion)}
-                                                    className="gap-1"
-                                                >
-                                                    <Eye className="h-3.5 w-3.5" />
-                                                    View
-                                                </Button>
-                                                {suggestion.status === "pending" && (
-                                                    <>
-                                                        <Button
-                                                            size="sm"
-                                                            onClick={() => handleOpenApprove(suggestion)}
-                                                            className="gap-1 bg-emerald-600 hover:bg-emerald-700"
-                                                        >
-                                                            <CheckCheck className="h-3.5 w-3.5" />
-                                                            Approve
-                                                        </Button>
+                                                    <div className="flex items-center gap-2 shrink-0">
                                                         <Button
                                                             variant="outline"
                                                             size="sm"
-                                                            onClick={() => handleReject(suggestion)}
-                                                            className="gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                            disabled={processing}
+                                                            onClick={() => handleViewSuggestion(suggestion)}
+                                                            className="gap-1"
                                                         >
-                                                            <Ban className="h-3.5 w-3.5" />
-                                                            Reject
+                                                            <Eye className="h-3.5 w-3.5" />
+                                                            View
                                                         </Button>
-                                                    </>
-                                                )}
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-8 w-8"
-                                                    onClick={() => setDeleteTarget(suggestion)}
-                                                >
-                                                    <Trash2 className="h-4 w-4 text-destructive" />
-                                                </Button>
+                                                        {suggestion.status === "pending" && (
+                                                            <>
+                                                                <Button
+                                                                    size="sm"
+                                                                    onClick={() => handleOpenApprove(suggestion)}
+                                                                    className="gap-1 bg-emerald-600 hover:bg-emerald-700"
+                                                                >
+                                                                    <CheckCheck className="h-3.5 w-3.5" />
+                                                                    Approve
+                                                                </Button>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => handleReject(suggestion)}
+                                                                    className="gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                                    disabled={processing}
+                                                                >
+                                                                    <Ban className="h-3.5 w-3.5" />
+                                                                    Reject
+                                                                </Button>
+                                                            </>
+                                                        )}
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8"
+                                                            onClick={() => setDeleteTarget(suggestion)}
+                                                        >
+                                                            <Trash2 className="h-4 w-4 text-destructive" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </AnimatePresence>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    {/* View Suggestion Dialog */}
+                    <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+                        <DialogContent className="max-w-lg">
+                            <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                    <Lightbulb className="h-5 w-5 text-amber-500" />
+                                    Suggestion Details
+                                </DialogTitle>
+                            </DialogHeader>
+                            {selectedSuggestion && (
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2">
+                                        {getStatusBadge(selectedSuggestion.status)}
+                                    </div>
+                                    <div className="space-y-3">
+                                        <div>
+                                            <Label className="text-muted-foreground text-xs">Internship Name</Label>
+                                            <p className="font-medium text-foreground">{selectedSuggestion.name}</p>
+                                        </div>
+                                        <div>
+                                            <Label className="text-muted-foreground text-xs">Application Link</Label>
+                                            <a
+                                                href={selectedSuggestion.link}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center gap-1 text-primary hover:underline"
+                                            >
+                                                {selectedSuggestion.link}
+                                                <ExternalLink className="h-3 w-3" />
+                                            </a>
+                                        </div>
+                                        {selectedSuggestion.description && (
+                                            <div>
+                                                <Label className="text-muted-foreground text-xs">Description</Label>
+                                                <p className="text-foreground whitespace-pre-wrap">{selectedSuggestion.description}</p>
+                                            </div>
+                                        )}
+                                        <hr />
+                                        <div className="grid grid-cols-2 gap-3 text-sm">
+                                            <div>
+                                                <Label className="text-muted-foreground text-xs">Submitted By</Label>
+                                                <p className="font-medium">{selectedSuggestion.submittedByName}</p>
+                                                <p className="text-muted-foreground text-xs">{selectedSuggestion.submittedBy}</p>
+                                            </div>
+                                            <div>
+                                                <Label className="text-muted-foreground text-xs">Submitted On</Label>
+                                                <p className="font-medium">{formatDate(selectedSuggestion.createdAt)}</p>
                                             </div>
                                         </div>
-                                    </motion.div>
-                                ))}
-                            </AnimatePresence>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
+                                    </div>
+                                    <DialogFooter>
+                                        <Button variant="outline" onClick={() => setViewDialogOpen(false)}>
+                                            Close
+                                        </Button>
+                                        {selectedSuggestion.status === "pending" && (
+                                            <Button
+                                                onClick={() => {
+                                                    setViewDialogOpen(false);
+                                                    handleOpenApprove(selectedSuggestion);
+                                                }}
+                                                className="bg-emerald-600 hover:bg-emerald-700 gap-1"
+                                            >
+                                                <CheckCheck className="h-4 w-4" />
+                                                Approve & Publish
+                                            </Button>
+                                        )}
+                                    </DialogFooter>
+                                </div>
+                            )}
+                        </DialogContent>
+                    </Dialog>
 
-            {/* View Suggestion Dialog */}
-            <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-                <DialogContent className="max-w-lg">
-                    <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <Lightbulb className="h-5 w-5 text-amber-500" />
-                            Suggestion Details
-                        </DialogTitle>
-                    </DialogHeader>
-                    {selectedSuggestion && (
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-2">
-                                {getStatusBadge(selectedSuggestion.status)}
+                    {/* Approve Dialog */}
+                    <Dialog open={approveDialogOpen} onOpenChange={setApproveDialogOpen}>
+                        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                    <CheckCheck className="h-5 w-5 text-emerald-500" />
+                                    Approve & Publish Internship
+                                </DialogTitle>
+                                <DialogDescription>
+                                    Review and edit the details before publishing to the internships page.
+                                </DialogDescription>
+                            </DialogHeader>
+
+                            <div className="space-y-4 py-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="approve-name">Internship Name *</Label>
+                                    <Input
+                                        id="approve-name"
+                                        value={approveFormData.name}
+                                        onChange={(e) => setApproveFormData({ ...approveFormData, name: e.target.value })}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="approve-link">Application Link *</Label>
+                                    <Input
+                                        id="approve-link"
+                                        type="url"
+                                        value={approveFormData.link}
+                                        onChange={(e) => setApproveFormData({ ...approveFormData, link: e.target.value })}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="approve-details">Details (Markdown supported)</Label>
+                                    <Textarea
+                                        id="approve-details"
+                                        placeholder="Add details about the internship..."
+                                        value={approveFormData.details}
+                                        onChange={(e) => setApproveFormData({ ...approveFormData, details: e.target.value })}
+                                        className="min-h-[150px] font-mono text-sm"
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="approve-category">Category</Label>
+                                        <Select
+                                            value={approveFormData.category}
+                                            onValueChange={(value) => setApproveFormData({ ...approveFormData, category: value as InternshipCategory })}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {Object.entries(categoryLabels).map(([key, label]) => (
+                                                    <SelectItem key={key} value={key}>
+                                                        {label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="approve-deadline">Deadline (Optional)</Label>
+                                        <Input
+                                            id="approve-deadline"
+                                            type="date"
+                                            value={approveFormData.deadline}
+                                            onChange={(e) => setApproveFormData({ ...approveFormData, deadline: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="approve-location">Location (Optional)</Label>
+                                        <Input
+                                            id="approve-location"
+                                            placeholder="e.g., Remote, Bangalore"
+                                            value={approveFormData.location}
+                                            onChange={(e) => setApproveFormData({ ...approveFormData, location: e.target.value })}
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="approve-stipend">Stipend (Optional)</Label>
+                                        <Input
+                                            id="approve-stipend"
+                                            placeholder="e.g., ₹15,000/month"
+                                            value={approveFormData.stipend}
+                                            onChange={(e) => setApproveFormData({ ...approveFormData, stipend: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
                             </div>
-                            <div className="space-y-3">
-                                <div>
-                                    <Label className="text-muted-foreground text-xs">Internship Name</Label>
-                                    <p className="font-medium text-foreground">{selectedSuggestion.name}</p>
-                                </div>
-                                <div>
-                                    <Label className="text-muted-foreground text-xs">Application Link</Label>
-                                    <a
-                                        href={selectedSuggestion.link}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-1 text-primary hover:underline"
-                                    >
-                                        {selectedSuggestion.link}
-                                        <ExternalLink className="h-3 w-3" />
-                                    </a>
-                                </div>
-                                {selectedSuggestion.description && (
-                                    <div>
-                                        <Label className="text-muted-foreground text-xs">Description</Label>
-                                        <p className="text-foreground whitespace-pre-wrap">{selectedSuggestion.description}</p>
-                                    </div>
-                                )}
-                                <hr />
-                                <div className="grid grid-cols-2 gap-3 text-sm">
-                                    <div>
-                                        <Label className="text-muted-foreground text-xs">Submitted By</Label>
-                                        <p className="font-medium">{selectedSuggestion.submittedByName}</p>
-                                        <p className="text-muted-foreground text-xs">{selectedSuggestion.submittedBy}</p>
-                                    </div>
-                                    <div>
-                                        <Label className="text-muted-foreground text-xs">Submitted On</Label>
-                                        <p className="font-medium">{formatDate(selectedSuggestion.createdAt)}</p>
-                                    </div>
-                                </div>
-                            </div>
+
                             <DialogFooter>
-                                <Button variant="outline" onClick={() => setViewDialogOpen(false)}>
-                                    Close
+                                <Button variant="outline" onClick={() => setApproveDialogOpen(false)} disabled={processing}>
+                                    Cancel
                                 </Button>
-                                {selectedSuggestion.status === "pending" && (
-                                    <Button
-                                        onClick={() => {
-                                            setViewDialogOpen(false);
-                                            handleOpenApprove(selectedSuggestion);
-                                        }}
-                                        className="bg-emerald-600 hover:bg-emerald-700 gap-1"
-                                    >
-                                        <CheckCheck className="h-4 w-4" />
-                                        Approve & Publish
-                                    </Button>
-                                )}
+                                <Button onClick={handleApprove} disabled={processing} className="bg-emerald-600 hover:bg-emerald-700 gap-2">
+                                    {processing ? (
+                                        <>
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                            Publishing...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CheckCheck className="h-4 w-4" />
+                                            Approve & Publish
+                                        </>
+                                    )}
+                                </Button>
                             </DialogFooter>
-                        </div>
-                    )}
-                </DialogContent>
-            </Dialog>
+                        </DialogContent>
+                    </Dialog>
 
-            {/* Approve Dialog */}
-            <Dialog open={approveDialogOpen} onOpenChange={setApproveDialogOpen}>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <CheckCheck className="h-5 w-5 text-emerald-500" />
-                            Approve & Publish Internship
-                        </DialogTitle>
-                        <DialogDescription>
-                            Review and edit the details before publishing to the internships page.
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="approve-name">Internship Name *</Label>
-                            <Input
-                                id="approve-name"
-                                value={approveFormData.name}
-                                onChange={(e) => setApproveFormData({ ...approveFormData, name: e.target.value })}
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="approve-link">Application Link *</Label>
-                            <Input
-                                id="approve-link"
-                                type="url"
-                                value={approveFormData.link}
-                                onChange={(e) => setApproveFormData({ ...approveFormData, link: e.target.value })}
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="approve-details">Details (Markdown supported)</Label>
-                            <Textarea
-                                id="approve-details"
-                                placeholder="Add details about the internship..."
-                                value={approveFormData.details}
-                                onChange={(e) => setApproveFormData({ ...approveFormData, details: e.target.value })}
-                                className="min-h-[150px] font-mono text-sm"
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="approve-category">Category</Label>
-                                <Select
-                                    value={approveFormData.category}
-                                    onValueChange={(value) => setApproveFormData({ ...approveFormData, category: value as InternshipCategory })}
+                    {/* Delete Confirmation */}
+                    <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Suggestion</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Are you sure you want to delete the suggestion &quot;{deleteTarget?.name}&quot;? This action cannot be undone.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel disabled={processing}>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                    onClick={handleDelete}
+                                    disabled={processing}
+                                    className="bg-destructive hover:bg-destructive/90"
                                 >
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {Object.entries(categoryLabels).map(([key, label]) => (
-                                            <SelectItem key={key} value={key}>
-                                                {label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                                    {processing ? (
+                                        <>
+                                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                            Deleting...
+                                        </>
+                                    ) : (
+                                        "Delete"
+                                    )}
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </>
+            )}
 
-                            <div className="space-y-2">
-                                <Label htmlFor="approve-deadline">Deadline (Optional)</Label>
-                                <Input
-                                    id="approve-deadline"
-                                    type="date"
-                                    value={approveFormData.deadline}
-                                    onChange={(e) => setApproveFormData({ ...approveFormData, deadline: e.target.value })}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="approve-location">Location (Optional)</Label>
-                                <Input
-                                    id="approve-location"
-                                    placeholder="e.g., Remote, Bangalore"
-                                    value={approveFormData.location}
-                                    onChange={(e) => setApproveFormData({ ...approveFormData, location: e.target.value })}
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="approve-stipend">Stipend (Optional)</Label>
-                                <Input
-                                    id="approve-stipend"
-                                    placeholder="e.g., ₹15,000/month"
-                                    value={approveFormData.stipend}
-                                    onChange={(e) => setApproveFormData({ ...approveFormData, stipend: e.target.value })}
-                                />
-                            </div>
-                        </div>
+            {/* Hackathon Suggestions Tab */}
+            {activeTab === "hackathons" && (
+                <>
+                    {/* Stats Cards */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <Card className="cursor-pointer hover:shadow-md transition-all" onClick={() => setHackFilterStatus("all")}>
+                            <CardContent className="pt-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-violet-50 dark:bg-violet-950/20 rounded-lg">
+                                        <Trophy className="h-6 w-6 text-violet-600 dark:text-violet-400" />
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl font-bold text-foreground">{hackathonSuggestions.length}</p>
+                                        <p className="text-sm text-muted-foreground">Total</p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                        <Card
+                            className={cn(
+                                "cursor-pointer hover:shadow-md transition-all",
+                                hackFilterStatus === "pending" && "ring-2 ring-amber-500"
+                            )}
+                            onClick={() => setHackFilterStatus("pending")}
+                        >
+                            <CardContent className="pt-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg relative">
+                                        <Clock className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                                        {hackathonSuggestions.filter(s => s.status === "pending").length > 0 && (
+                                            <span className="absolute -top-1 -right-1 h-5 w-5 bg-amber-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse">
+                                                {hackathonSuggestions.filter(s => s.status === "pending").length}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl font-bold text-foreground">{hackathonSuggestions.filter(s => s.status === "pending").length}</p>
+                                        <p className="text-sm text-muted-foreground">Pending</p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                        <Card
+                            className={cn(
+                                "cursor-pointer hover:shadow-md transition-all",
+                                hackFilterStatus === "approved" && "ring-2 ring-emerald-500"
+                            )}
+                            onClick={() => setHackFilterStatus("approved")}
+                        >
+                            <CardContent className="pt-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg">
+                                        <CheckCircle2 className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl font-bold text-foreground">{hackathonSuggestions.filter(s => s.status === "approved").length}</p>
+                                        <p className="text-sm text-muted-foreground">Approved</p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                        <Card
+                            className={cn(
+                                "cursor-pointer hover:shadow-md transition-all",
+                                hackFilterStatus === "rejected" && "ring-2 ring-red-500"
+                            )}
+                            onClick={() => setHackFilterStatus("rejected")}
+                        >
+                            <CardContent className="pt-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg">
+                                        <XCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl font-bold text-foreground">{hackathonSuggestions.filter(s => s.status === "rejected").length}</p>
+                                        <p className="text-sm text-muted-foreground">Rejected</p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </div>
 
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setApproveDialogOpen(false)} disabled={processing}>
-                            Cancel
-                        </Button>
-                        <Button onClick={handleApprove} disabled={processing} className="bg-emerald-600 hover:bg-emerald-700 gap-2">
-                            {processing ? (
-                                <>
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                    Publishing...
-                                </>
+                    {/* Hackathon Suggestions List */}
+                    <Card>
+                        <CardHeader className="pb-4">
+                            <div className="flex flex-col gap-4">
+                                <CardTitle className="flex items-center gap-2">
+                                    <Sparkles className="h-5 w-5 text-violet-500" />
+                                    Hackathon Suggestions
+                                </CardTitle>
+                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                                    <div className="relative flex-1 sm:flex-none">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                            placeholder="Search by name or submitter..."
+                                            value={hackSearchQuery}
+                                            onChange={(e) => setHackSearchQuery(e.target.value)}
+                                            className="pl-9 w-full sm:w-[280px]"
+                                        />
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <Select value={hackFilterStatus} onValueChange={(v) => setHackFilterStatus(v as FilterStatus)}>
+                                            <SelectTrigger className="w-[140px]">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">All ({hackathonSuggestions.length})</SelectItem>
+                                                <SelectItem value="pending">Pending ({hackathonSuggestions.filter(s => s.status === "pending").length})</SelectItem>
+                                                <SelectItem value="approved">Approved ({hackathonSuggestions.filter(s => s.status === "approved").length})</SelectItem>
+                                                <SelectItem value="rejected">Rejected ({hackathonSuggestions.filter(s => s.status === "rejected").length})</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            {hackathonLoading ? (
+                                <div className="flex items-center justify-center py-12">
+                                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                    <span className="ml-3 text-muted-foreground">Loading hackathon suggestions...</span>
+                                </div>
+                            ) : hackathonSuggestions.filter((s) => {
+                                const matchesSearch =
+                                    s.name.toLowerCase().includes(hackSearchQuery.toLowerCase()) ||
+                                    s.submittedBy.toLowerCase().includes(hackSearchQuery.toLowerCase()) ||
+                                    s.submittedByName.toLowerCase().includes(hackSearchQuery.toLowerCase());
+                                const matchesStatus = hackFilterStatus === "all" || s.status === hackFilterStatus;
+                                return matchesSearch && matchesStatus;
+                            }).length === 0 ? (
+                                <div className="text-center py-12">
+                                    <Trophy className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                                    <h3 className="text-lg font-semibold text-foreground">
+                                        {hackSearchQuery || hackFilterStatus !== "all" ? "No suggestions found" : "No hackathon suggestions yet"}
+                                    </h3>
+                                    <p className="text-muted-foreground mt-1">
+                                        {hackSearchQuery || hackFilterStatus !== "all"
+                                            ? "Try adjusting your filters"
+                                            : "Hackathon suggestions will appear here"}
+                                    </p>
+                                </div>
                             ) : (
-                                <>
-                                    <CheckCheck className="h-4 w-4" />
-                                    Approve & Publish
-                                </>
+                                <div className="space-y-3">
+                                    <AnimatePresence mode="popLayout">
+                                        {hackathonSuggestions.filter((s) => {
+                                            const matchesSearch =
+                                                s.name.toLowerCase().includes(hackSearchQuery.toLowerCase()) ||
+                                                s.submittedBy.toLowerCase().includes(hackSearchQuery.toLowerCase()) ||
+                                                s.submittedByName.toLowerCase().includes(hackSearchQuery.toLowerCase());
+                                            const matchesStatus = hackFilterStatus === "all" || s.status === hackFilterStatus;
+                                            return matchesSearch && matchesStatus;
+                                        }).map((suggestion, index) => (
+                                            <motion.div
+                                                key={suggestion.id}
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -10 }}
+                                                transition={{ delay: index * 0.03 }}
+                                                className={cn(
+                                                    "p-4 rounded-lg border bg-card hover:shadow-md transition-all",
+                                                    suggestion.status === "pending" && "border-l-4 border-l-violet-500"
+                                                )}
+                                            >
+                                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-start gap-3">
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="flex items-center gap-2 flex-wrap mb-1">
+                                                                    <h3 className="font-semibold text-foreground truncate">
+                                                                        {suggestion.name}
+                                                                    </h3>
+                                                                    {getStatusBadge(suggestion.status)}
+                                                                </div>
+                                                                <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
+                                                                    <span className="flex items-center gap-1">
+                                                                        <User className="h-3 w-3" />
+                                                                        {suggestion.submittedByName}
+                                                                    </span>
+                                                                    <span className="flex items-center gap-1">
+                                                                        <Mail className="h-3 w-3" />
+                                                                        {suggestion.submittedBy}
+                                                                    </span>
+                                                                    <span className="flex items-center gap-1">
+                                                                        <Calendar className="h-3 w-3" />
+                                                                        {formatDate(suggestion.createdAt)}
+                                                                    </span>
+                                                                </div>
+                                                                {suggestion.description && (
+                                                                    <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                                                                        {suggestion.description}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 shrink-0">
+                                                        <a
+                                                            href={suggestion.link}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-primary hover:underline flex items-center gap-1 text-sm"
+                                                        >
+                                                            <ExternalLink className="h-3 w-3" />
+                                                            View Link
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </AnimatePresence>
+                                </div>
                             )}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-
-            {/* Delete Confirmation */}
-            <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Suggestion</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Are you sure you want to delete the suggestion &quot;{deleteTarget?.name}&quot;? This action cannot be undone.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel disabled={processing}>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={handleDelete}
-                            disabled={processing}
-                            className="bg-destructive hover:bg-destructive/90"
-                        >
-                            {processing ? (
-                                <>
-                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                    Deleting...
-                                </>
-                            ) : (
-                                "Delete"
-                            )}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+                        </CardContent>
+                    </Card>
+                </>
+            )}
         </div>
     );
 }
