@@ -253,7 +253,7 @@ export default function HomePage() {
           >
             <Badge variant="secondary" className="mb-6 gap-1.5 px-4 py-1.5">
               <Sparkles className="h-3.5 w-3.5" />
-              AI-Powered Learning Platform
+              Built for Engineering Students
             </Badge>
           </motion.div>
 
@@ -263,9 +263,9 @@ export default function HomePage() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-headline mb-6 leading-tight"
           >
-            Master Your Entire Syllabus with{" "}
+            Your Complete{" "}
             <span className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent">
-              Your Personal AI Tutor
+              Academic Success Platform
             </span>
           </motion.h1>
 
@@ -275,8 +275,8 @@ export default function HomePage() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto mb-10"
           >
-            Stop searching, start learning. Get instant access to topper-verified notes
-            and AI-powered study strategies. Free for a limited time.
+            Everything you need to excel in engineering — topper-verified study materials,
+            AI-powered learning tools, and personalized exam strategies. All in one place.
           </motion.p>
 
           <motion.div

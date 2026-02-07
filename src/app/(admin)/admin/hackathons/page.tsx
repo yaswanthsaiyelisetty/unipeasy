@@ -159,10 +159,10 @@ export default function AdminHackathonsPage() {
                 details: formData.details.trim(),
                 link: formData.link.trim(),
                 category: formData.category,
-                deadline: formData.deadline || null,
-                location: formData.location.trim() || null,
-                prizePool: formData.prizePool.trim() || null,
-                teamSize: formData.teamSize.trim() || null,
+                deadline: formData.deadline || undefined,
+                location: formData.location.trim() || undefined,
+                prizePool: formData.prizePool.trim() || undefined,
+                teamSize: formData.teamSize.trim() || undefined,
                 updatedAt: now,
             };
 
@@ -170,7 +170,7 @@ export default function AdminHackathonsPage() {
                 await updateDoc(doc(db, "hackathons", editingId), data);
                 setHackathons((prev) =>
                     prev.map((h) =>
-                        h.id === editingId ? { ...h, ...data } : h
+                        h.id === editingId ? ({ ...h, ...data } as Hackathon) : h
                     )
                 );
                 toast({
