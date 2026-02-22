@@ -18,18 +18,6 @@
 
 ---
 
-## 📸 Preview
-
-<div align="center">
-
-| Landing Page | Dashboard |
-|:---:|:---:|
-| ![Landing Page](https://img.shields.io/badge/View-Landing_Page-7c3aed?style=flat-square) | ![Dashboard](https://img.shields.io/badge/View-Dashboard-7c3aed?style=flat-square) |
-
-</div>
-
----
-
 ## ✨ Features
 
 ### 🤖 AI-Powered Learning Suite
